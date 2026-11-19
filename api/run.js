@@ -35,7 +35,10 @@ export default async function handler(req, res) {
   if (tooMany(ip)) return res.status(429).json({ error: 'Too many requests. Try again in a few minutes.' });
 
   // Only Module 1 is public. The browser sends a transcript and may pick a model from the allowlist.
-  const { mode = 'module1', input = '', model, debug } = req.body || {};
+  const { mode = 'module1', input = '', model } = req.body || {};
+  // Debug output (the model's raw extraction) only with the right token; without DEBUG_TOKEN set on the server it is always off.
+  const token = process.env.DEBUG_TOKEN;
+  const debug = Boolean(token) && req.headers['x-debug-token'] === token;
   if (mode !== 'module1') return res.status(400).json({ error: 'Unknown mode' });
   if (typeof input !== 'string' || !input.trim()) return res.status(400).json({ error: 'No transcript received' });
   if (input.length > MAX_INPUT) return res.status(400).json({ error: `Transcript too long (max ${MAX_INPUT} characters)` });
@@ -43,7 +46,7 @@ export default async function handler(req, res) {
   if (typeof useModel !== 'string' || !Object.hasOwn(EXTRACT_MODELS, useModel)) return res.status(400).json({ error: 'Unknown model' });
 
   try {
-    const out = await module1(useModel, input, Date.now(), debug === true);
+    const out = await module1(useModel, input, Date.now(), debug);
     if (out.error) return res.status(502).json({ error: out.error });
     return res.status(200).json(out);
   } catch (e) {

@@ -1,5 +1,5 @@
 {
-  "toelichting": "FICTIONAL: seven invented Helix Labs meeting transcripts for Module 1. Every name, figure and company is made up. 'expected' = the decisions the system should end up with after the rule checks (decision is matched by meaning; flags are checked by decision_contains). 'all_hands_must_exclude' = terms that must never appear in the all-hands text.",
+  "toelichting": "FICTIONAL: seven invented Helix Labs meeting transcripts for Module 1. Every name, figure and company is made up. 'expected' = the decisions the system should end up with after the rule checks (decision is matched by meaning; flags are checked by decision_contains). 'all_hands_must_exclude' = terms that must never appear in the all-hands text. Labels the transcript does not state are expected as leadership_only with the flag label_needs_review.",
   "cases": [
     {
       "name": "1 Normal: onboarding and pricing",
@@ -40,7 +40,7 @@
             "decision": "fix the export problem",
             "owner": "Jon",
             "due_date": "14 March",
-            "label": "all_hands",
+            "label": "leadership_only",
             "status": "agreed",
             "goal_or_okr": "support OKR: under 400 tickets a month"
           },
@@ -48,7 +48,7 @@
             "decision": "build a customer status page",
             "owner": "Lena",
             "due_date": "21 March",
-            "label": "all_hands",
+            "label": "leadership_only",
             "status": "agreed",
             "goal_or_okr": "support OKR: under 400 tickets a month"
           },
@@ -61,7 +61,16 @@
             "trade_off": "mobile app slips to Q4"
           }
         ],
-        "flags": [],
+        "flags": [
+          {
+            "decision_contains": "export",
+            "flag": "label_needs_review"
+          },
+          {
+            "decision_contains": "status page",
+            "flag": "label_needs_review"
+          }
+        ],
         "all_hands_must_exclude": [
           "API v2"
         ]
@@ -92,6 +101,10 @@
           {
             "decision_contains": "security review",
             "flag": "missing_owner"
+          },
+          {
+            "decision_contains": "security review",
+            "flag": "label_needs_review"
           }
         ],
         "all_hands_must_exclude": [
@@ -106,6 +119,13 @@
       "expected": {
         "decisions": [
           {
+            "decision": "no webinar series this autumn",
+            "owner": null,
+            "due_date": null,
+            "label": "leadership_only",
+            "status": "agreed"
+          },
+          {
             "decision": "write one customer case study per month",
             "owner": "Priya",
             "due_date": "15 September",
@@ -114,11 +134,25 @@
             "trade_off": "less live contact with prospects"
           }
         ],
-        "flags": [],
+        "flags": [
+          {
+            "decision_contains": "no webinar",
+            "flag": "missing_owner"
+          },
+          {
+            "decision_contains": "no webinar",
+            "flag": "missing_date"
+          },
+          {
+            "decision_contains": "no webinar",
+            "flag": "label_needs_review"
+          }
+        ],
         "all_hands_must_exclude": [
           "webinar"
         ],
-        "comment": "The webinar decision is reversed and must not appear as an active decision."
+        "comment": "The reversed 'monthly webinar series' (10 September) must be dropped. The final 'no webinar series' item is kept, without owner or date, and stays out of the all-hands text.",
+        "reversed_due_date": "10 September"
       }
     },
     {
@@ -131,7 +165,7 @@
             "decision": "extend support hours until 20:00",
             "owner": "Lena",
             "due_date": "5 May",
-            "label": "all_hands",
+            "label": "leadership_only",
             "status": "agreed",
             "goal_or_okr": "Q2 support goal: first response under four hours"
           },
@@ -139,17 +173,22 @@
             "decision": "postpone the blog redesign",
             "owner": "Priya",
             "due_date": "September",
-            "label": "all_hands",
+            "label": "leadership_only",
             "status": "agreed"
           }
         ],
         "flags": [
           {
             "decision_contains": "support hours",
-            "flag": "merged_duplicate"
+            "flag": "label_needs_review"
+          },
+          {
+            "decision_contains": "blog redesign",
+            "flag": "label_needs_review"
           }
         ],
-        "all_hands_must_exclude": []
+        "all_hands_must_exclude": [],
+        "comment": "Passes with one merged support-hours item, whether the model or the rule merged it."
       }
     },
     {

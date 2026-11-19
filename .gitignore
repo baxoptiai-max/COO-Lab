@@ -6,4 +6,4 @@ node_modules/
 CLAUDE.md
 .claude/
 tests/raw/
-tests/results-*.md
+tests/results-diag.md

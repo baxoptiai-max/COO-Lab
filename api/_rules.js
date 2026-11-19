@@ -22,6 +22,7 @@ export function applyRules(raw) {
   let items = (Array.isArray(raw?.decisions) ? raw.decisions : []).map(d => {
     const o = { flags: [] };
     for (const f of fields) o[f] = empty(d?.[f]) ? null : d[f];
+    o.label_stated = d?.label_stated === true;
     o.low_confidence = empty(d?.low_confidence) ? null : d.low_confidence;
     return o;
   });
@@ -41,6 +42,7 @@ export function applyRules(raw) {
     for (const f of fields) if (first[f] === null && d[f] !== null) first[f] = d[f];
     if (d.source_quote && d.source_quote !== first.source_quote) first.source_quote = `${first.source_quote} … ${d.source_quote}`;
     first.low_confidence = first.low_confidence || d.low_confidence;
+    if (!first.label_stated && d.label_stated) { first.label = d.label; first.label_stated = true; }
     addFlag(first, 'merged_duplicate');
   }
   if (merged.length < items.length) notes.push(`${items.length - merged.length} duplicate mention(s) merged.`);
@@ -51,8 +53,9 @@ export function applyRules(raw) {
     if (d.due_date === null) addFlag(d, 'missing_date');
     if (d.source_quote === null) addFlag(d, 'missing_quote');
     if (d.low_confidence) addFlag(d, 'low_confidence');
-    if (d.label !== null && !LABELS.includes(d.label)) { d.label = null; }
-    if (d.label === null) addFlag(d, 'missing_label');
+    // Label rule: all_hands (or board_only) only when the transcript says so; otherwise leadership_only, for review.
+    if (d.label !== null && !LABELS.includes(d.label)) d.label = null;
+    if (!d.label_stated || d.label === null) { d.label = 'leadership_only'; addFlag(d, 'label_needs_review'); }
     if (d.status !== null && !STATUSES.includes(d.status)) { d.status = null; }
     if (d.status === null) addFlag(d, 'missing_status');
   }

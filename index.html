@@ -527,7 +527,7 @@ buildPicker(); render();
 // Try it box (Module 1): sends the transcript to /api/run (mode "module1"); the keys and prompts stay on the server.
 (function(){
   const $ = id => document.getElementById(id);
-  const FLAGS = {missing_owner:'no owner', missing_date:'no date', missing_label:'no label', missing_status:'no status', missing_quote:'no quote', low_confidence:'low confidence', merged_duplicate:'merged duplicate'};
+  const FLAGS = {missing_owner:'no owner', missing_date:'no date', label_needs_review:'label needs review', missing_status:'no status', missing_quote:'no quote', low_confidence:'low confidence', merged_duplicate:'merged duplicate'};
   async function loadModels(){
     let list = [], def = '';
     try { const d = await (await fetch('/api/run')).json(); list = d.extract_models || []; def = d.default_model; } catch (e) {}
