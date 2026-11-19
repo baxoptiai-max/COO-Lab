@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   if (tooMany(ip)) return res.status(429).json({ error: 'Too many requests. Try again in a few minutes.' });
 
   // Only Module 1 is public. The browser sends a transcript and may pick a model from the allowlist.
-  const { mode = 'module1', input = '', model } = req.body || {};
+  const { mode = 'module1', input = '', model, debug } = req.body || {};
   if (mode !== 'module1') return res.status(400).json({ error: 'Unknown mode' });
   if (typeof input !== 'string' || !input.trim()) return res.status(400).json({ error: 'No transcript received' });
   if (input.length > MAX_INPUT) return res.status(400).json({ error: `Transcript too long (max ${MAX_INPUT} characters)` });
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
   if (typeof useModel !== 'string' || !Object.hasOwn(EXTRACT_MODELS, useModel)) return res.status(400).json({ error: 'Unknown model' });
 
   try {
-    const out = await module1(useModel, input, Date.now());
+    const out = await module1(useModel, input, Date.now(), debug === true);
     if (out.error) return res.status(502).json({ error: out.error });
     return res.status(200).json(out);
   } catch (e) {
@@ -92,10 +92,11 @@ function costOf(model, usage) {
 }
 
 // Module 1: extract decisions, check them in code, then write the all-hands text from cleared items only.
-async function module1(model, transcript, started) {
+async function module1(model, transcript, started, debug = false) {
   const first = await callAnthropic(model, prompts.extract, transcript);
   if (first.error) return { error: first.error };
-  const { decisions, dropped, notes } = applyRules(parseJson(first.text));
+  const extracted = parseJson(first.text);
+  const { decisions, dropped, notes } = applyRules(extracted);
   const cleared = allHandsItems(decisions);
   let allHands = null, usage = first.usage;
   if (cleared.length) {
@@ -107,5 +108,5 @@ async function module1(model, transcript, started) {
     if (leaked.length) notes.push(`All-hands text withheld: it mentions words from items that are not cleared (${leaked.join(', ')}).`);
     else allHands = text;
   } else notes.push('No item is both agreed and labelled all_hands, so there is no all-hands text.');
-  return { mode: 'module1', model, decisions, dropped, notes, all_hands: allHands, usage, ms: Date.now() - started, cost_usd: costOf(model, usage) };
+  return { mode: 'module1', model, decisions, dropped, notes, all_hands: allHands, usage, ms: Date.now() - started, cost_usd: costOf(model, usage), ...(debug ? { raw_extraction: extracted } : {}) };
 }

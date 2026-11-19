@@ -2,12 +2,15 @@
 // Usage: BASE_URL=https://your-deployment node tests/run-live.mjs
 // If the deployment is behind Vercel Authentication, also set VERCEL_BYPASS (the project's protection-bypass secret).
 // Nothing here changes prompts or rules; it only calls the endpoint and scores the answers.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 const BASE = (process.env.BASE_URL || '').replace(/\/$/, '');
 if (!BASE) { console.error('Set BASE_URL to the deployed link.'); process.exit(1); }
 const MODELS = [['Haiku', 'claude-haiku-5-5'], ['Sonnet', 'claude-sonnet-5-5']];
 const cases = JSON.parse(readFileSync(new URL('../tests.json', import.meta.url))).cases;
+// ONLY_CASES="2,4,5" runs just those cases (numbers as in the case names). DEBUG=1 also asks for the raw model extraction.
+const ONLY = process.env.ONLY_CASES ? process.env.ONLY_CASES.split(',').map(n => Number(n) - 1) : null;
+const DEBUG = process.env.DEBUG === '1';
 // Case 4 must drop the reversed webinar decision (checked in the table, not only in the text).
 const REVERSED_TERM = { 3: 'webinar' };
 
@@ -20,7 +23,7 @@ async function call(model, input) {
   const headers = { 'Content-Type': 'application/json' };
   if (process.env.VERCEL_BYPASS) headers['x-vercel-protection-bypass'] = process.env.VERCEL_BYPASS;
   const t = Date.now();
-  const r = await fetch(BASE + '/api/run', { method: 'POST', headers, body: JSON.stringify({ mode: 'module1', input, model }) });
+  const r = await fetch(BASE + '/api/run', { method: 'POST', headers, body: JSON.stringify({ mode: 'module1', input, model, debug: DEBUG || undefined }) });
   const text = await r.text();
   let body; try { body = JSON.parse(text); } catch { body = { error: 'Not JSON (HTTP ' + r.status + ')' }; }
   return { status: r.status, body, ms: Date.now() - t };
@@ -59,6 +62,7 @@ function score(c, i, out) {
 
 const rows = [];
 for (const [i, c] of cases.entries()) {
+  if (ONLY && !ONLY.includes(i)) continue;
   for (const [label, id] of MODELS) {
     const res = await call(id, c.input);
     if (res.status !== 200 || res.body.error) {

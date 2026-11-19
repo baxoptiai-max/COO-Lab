@@ -5,3 +5,5 @@ _private/
 node_modules/
 CLAUDE.md
 .claude/
+tests/raw/
+tests/results-*.md
