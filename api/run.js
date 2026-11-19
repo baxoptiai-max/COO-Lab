@@ -34,7 +34,7 @@ export default async function handler(req, res) {
   const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
   if (tooMany(ip)) return res.status(429).json({ error: 'Too many requests. Try again in a few minutes.' });
 
-  // Only Module 1 is public. The browser sends a transcript and may pick a model from the allowlist.
+  // Only Phase 1a is public. The browser sends a transcript and may pick a model from the allowlist.
   const { mode = 'module1', input = '', model } = req.body || {};
   // Debug output (the model's raw extraction) only with the right token; without DEBUG_TOKEN set on the server it is always off.
   const token = process.env.DEBUG_TOKEN;
@@ -94,7 +94,7 @@ function costOf(model, usage) {
   return ((usage.prompt_tokens || 0) * p.in + (usage.completion_tokens || 0) * p.out) / 1e6;
 }
 
-// Module 1: extract decisions, check them in code, then write the all-hands text from cleared items only.
+// Phase 1a: extract decisions, check them in code, then write the all-hands text from cleared items only.
 async function module1(model, transcript, started, debug = false) {
   const first = await callAnthropic(model, prompts.extract, transcript);
   if (first.error) return { error: first.error };

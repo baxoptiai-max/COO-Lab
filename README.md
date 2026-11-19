@@ -13,7 +13,7 @@ I built this in one day with Claude Code, and every step is in the git history. 
 | Time | Step |
 |---|---|
 | 14:11 | New repo from a cleaned copy of an earlier project: no earlier case content, no old history |
-| 15:55 | Module 1: decision schema, rule checks in code, 7 fictional test transcripts, a "Try it" box |
+| 15:55 | Phase 1a: decision schema, rule checks in code, 7 fictional test transcripts, a "Try it" box |
 | 16:03 | Concept page becomes the front page; the server function is hardened (model allowlist, 12,000 character cap, 20 requests per 10 minutes per IP, no keys or prompts in errors) |
 | 16:06 to 16:25 | Live test runner for the deployed link |
 | 16:23 | Run 1, the baseline, with no changes |
@@ -37,9 +37,11 @@ I built this in one day with Claude Code, and every step is in the git history. 
 
 Each week, decisions move from the meeting to an owner and a date, and the COO decides what the whole company hears. Nobody receives anything before a person approves it.
 
-- **Module 1, decision to action (built).** The meeting transcript goes in. Each decision gets an owner, a date, a link to a goal, a status and a label. The code flags missing owners and dates, merges a decision mentioned twice, and keeps only the final position of a reversed one. The all-hands paragraph is written only from items that are agreed and labelled all_hands. You can try it on the front page.
-- **Module 2, an always-on all-hands page you can ask (demo; next step is 1b).** One live page holds the mission, targets, decision log and each leader's update. A question is answered with a source, and what can be searched depends on who asks: a leader sees leadership-only items, a colleague does not. The page shows this as a demo with placeholder content. Next step: connect it to the real documents.
-- **Module 3, the weekly update (next step).** Each leader's update is drafted from the leadership meeting transcript, and the leader adds or corrects it by voice. On the page, dictation is simulated; no microphone is used. Next step: real speech to text.
+Phase 1 has three parts, 1a to 1c. Phase 2 is described in section 5.
+
+- **Phase 1a, decision to action (built).** The meeting transcript goes in. Each decision gets an owner, a date, a link to a goal, a status and a label. The code flags missing owners and dates, merges a decision mentioned twice, and keeps only the final position of a reversed one. The all-hands paragraph is written only from items that are agreed and labelled all_hands. You can try it on the front page.
+- **Phase 1b, an always-on all-hands page you can ask (demo).** One live page holds the mission, targets, decision log and each leader's update. A question is answered with a source, and what can be searched depends on who asks: a leader sees leadership-only items, a colleague does not. The page shows this as a demo with placeholder content. Next step: connect it to the real documents.
+- **Phase 1c, the weekly update (next step).** Each leader's update is drafted from the leadership meeting transcript, and the leader adds or corrects it by voice. On the page, dictation is simulated; no microphone is used. Next step: real speech to text.
 - **Human approval points.** The COO approves the decision log and the all-hands text. Each leader signs off on their own update. The system never publishes by itself.
 - **All-hands is opt-in.** If a transcript does not say who may hear an item, the item becomes leadership_only and is flagged label_needs_review. An item reaches all-hands only when the transcript says so explicitly.
 

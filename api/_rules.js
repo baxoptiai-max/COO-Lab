@@ -1,4 +1,4 @@
-// Rule checks for Module 1. These run in code, not in the prompt, on what the model returned.
+// Rule checks for Phase 1a. These run in code, not in the prompt, on what the model returned.
 // (The underscore keeps Vercel from turning this file into its own web address.)
 import { LABELS, STATUSES, fields } from './_prompts.js';
 

@@ -1,5 +1,5 @@
 {
-  "toelichting": "FICTIONAL: seven invented Helix Labs meeting transcripts for Module 1. Every name, figure and company is made up. 'expected' = the decisions the system should end up with after the rule checks (decision is matched by meaning; flags are checked by decision_contains). 'all_hands_must_exclude' = terms that must never appear in the all-hands text. Labels the transcript does not state are expected as leadership_only with the flag label_needs_review.",
+  "toelichting": "FICTIONAL: seven invented Helix Labs meeting transcripts for Phase 1a. Every name, figure and company is made up. 'expected' = the decisions the system should end up with after the rule checks (decision is matched by meaning; flags are checked by decision_contains). 'all_hands_must_exclude' = terms that must never appear in the all-hands text. Labels the transcript does not state are expected as leadership_only with the flag label_needs_review.",
   "cases": [
     {
       "name": "1 Normal: onboarding and pricing",

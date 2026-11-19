@@ -195,7 +195,7 @@ body.no-why .why{display:none}
 </div>
 
 <section class="stack" aria-labelledby="h-base">
-  <h2 id="h-base">The baseline these modules enforce</h2>
+  <h2 id="h-base">The baseline Phase 1 enforces</h2>
   <div class="grid2">
     <div class="card stack">
       <h3>Meeting cadence</h3>
@@ -230,13 +230,14 @@ body.no-why .why{display:none}
       <p class="note">Success measure: workflows still in use after 90 days, not attendance.</p>
     </div>
     <div class="card stack">
-      <h3>Route choice</h3>
+      <h3>Rollout Phases</h3>
       <div class="tbl"><table>
         <thead><tr><th>Part</th><th>Route</th></tr></thead>
         <tbody>
           <tr><td>Transcript</td><td>Consume: the meeting tool already in use</td></tr>
-          <tr><td>Module 1</td><td>Embed: own small app on the contracted AI provider, fixed schema, rule checks, approval step</td></tr>
-          <tr><td>Module 2</td><td>Extend with RAG: the all-hands page is a knowledge problem, solved by retrieval with role-based access and citations</td></tr>
+          <tr><td>Phase 1a</td><td>Embed: own small app on the contracted AI provider, fixed schema, rule checks, approval step</td></tr>
+          <tr><td>Phase 1b</td><td>Extend with RAG: the all-hands page is a knowledge problem, solved by retrieval with role-based access and citations</td></tr>
+          <tr><td>Phase 2</td><td>Indicated, not built: KPI scorecard and research-to-delivery handoff</td></tr>
           <tr><td>Rejected</td><td>Fine-tuning (no labelled data, behaviour is solved by schema), Build (not relevant)</td></tr>
         </tbody>
       </table></div>
@@ -258,14 +259,14 @@ body.no-why .why{display:none}
 </section>
 
 <section class="stack" aria-labelledby="h-m1">
-  <span class="eyebrow">Module 1 · Decision to action</span>
+  <span class="eyebrow">Phase 1a · Decision to action</span>
   <h2 id="h-m1">From leadership meeting to <span class="gt">action</span></h2>
   <p>Every decision gets an owner, a date, a link to a company goal and a confidentiality label. Nothing is published before the COO approves it.</p>
   <div class="flow" id="flow1"></div>
 </section>
 
 <section class="stack" aria-labelledby="h-m2">
-  <span class="eyebrow">Module 2 · The all-hands page (Extend with RAG)</span>
+  <span class="eyebrow">Phase 1b · The all-hands page (Extend with RAG)</span>
   <h2 id="h-m2">An always-on all-hands page you can <span class="gt">ask</span></h2>
   <p>The all-hands is no longer a deck. It is one live page with vision, mission, targets, delivery status, the decision log and each leader's weekly status update. In the weekly all-hands, leadership walks through what changed on the page; between meetings, anyone can ask it a question and get an answer with its source.</p>
   <p>What the page can search depends on who is asking. Access is filtered before the model reads anything, so a colleague's question never reaches leadership-only text.</p>
@@ -273,7 +274,7 @@ body.no-why .why{display:none}
 </section>
 
 <section class="stack" aria-labelledby="h-m3">
-  <span class="eyebrow">Module 3 · Weekly status update</span>
+  <span class="eyebrow">Phase 1c · Weekly status update</span>
   <h2 id="h-m3">How the weekly updates get onto the page</h2>
   <p>Leaders don't start from a blank page. The leadership meeting transcript already holds most of their status, so COO Lab drafts each leader's update from it. The leader then adds or corrects by speaking instead of typing: a Stanford study found speech input about three times faster than typing on a phone keyboard (<a href="https://news.stanford.edu/stories/2016/08/stanford-study-speech-recognition-faster-texting">Stanford, 2016</a>).</p>
   <div class="flow" id="flow3"></div>
@@ -633,7 +634,7 @@ function render(){ renderFlow1(); renderFlow2(); renderFlow3(); renderRag(); }
 buildPicker(); render();
 </script>
 <script>
-// Try it box (Module 1): sends the transcript to /api/run (mode "module1"); the keys and prompts stay on the server.
+// Try it box (Phase 1a): sends the transcript to /api/run (mode "module1"); the keys and prompts stay on the server.
 (function(){
   const $ = id => document.getElementById(id);
   const FLAGS = {missing_owner:'no owner', missing_date:'no date', label_needs_review:'label needs review', missing_status:'no status', missing_quote:'no quote', low_confidence:'low confidence', merged_duplicate:'merged duplicate'};

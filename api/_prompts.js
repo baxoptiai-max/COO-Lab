@@ -1,4 +1,4 @@
-// Module 1: decision log from a leadership meeting transcript.
+// Phase 1a: decision log from a leadership meeting transcript.
 // The browser only chooses a mode and a model; the instructions and models live here on the server.
 // The underscore in the file name stops Vercel from turning this file into its own web address.
 
