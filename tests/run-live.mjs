@@ -60,6 +60,8 @@ function score(c, i, out) {
   return { fieldOk, fieldAll, flagOk, flagAll, extra, missingDecisions, leaks, withheld };
 }
 
+const TAG = process.env.RUN_TAG ? '-' + process.env.RUN_TAG : '';
+const raw = [];
 const rows = [];
 for (const [i, c] of cases.entries()) {
   if (ONLY && !ONLY.includes(i)) continue;
@@ -70,6 +72,7 @@ for (const [i, c] of cases.entries()) {
       console.log(`case ${i + 1} ${label}: ERROR ${res.body.error || res.status}`);
       continue;
     }
+    raw.push({ case: c.name, model: label, raw_model_output: res.body.raw_extraction, post_rules_output: { ...res.body, raw_extraction: undefined } });
     const s = score(c, i, res.body);
     rows.push({ i, label, ms: res.ms, ...s });
     console.log(`case ${i + 1} ${label}: fields ${s.fieldOk}/${s.fieldAll} flags ${s.flagOk}/${s.flagAll} leak ${s.leaks.length ? 'YES ' + s.leaks.join(',') : 'no'}`);
@@ -94,5 +97,6 @@ for (const [label] of MODELS) {
   md += `| ${label} | ${sum('fieldOk')}/${sum('fieldAll')} (${pct(sum('fieldOk'), sum('fieldAll'))}) | ${sum('flagOk')}/${sum('flagAll')} (${pct(sum('flagOk'), sum('flagAll'))}) | ${ok.filter(r => r.leaks.length).length} | ${ok.filter(r => r.withheld).length} | ${m.length - ok.length} | ${avg.toFixed(1)} |\n`;
 }
 md += '\nScoring: fields = owner, due date, label and status of each expected decision, matched by wording; flags = expected flags on the right decision, plus the reversed webinar decision dropped in case 4; a leak (any all_hands_must_exclude term in the all-hands text) fails the case whatever the other scores.\n';
-writeFileSync(new URL('./results.md', import.meta.url), md);
-console.log('Saved tests/results.md');
+writeFileSync(new URL(`./results${TAG}.md`, import.meta.url), md);
+if (raw.length) { mkdirSync(new URL('./raw/', import.meta.url), { recursive: true }); writeFileSync(new URL(`./raw/raw${TAG}.json`, import.meta.url), JSON.stringify(raw, null, 2)); }
+console.log(`Saved tests/results${TAG}.md`);
