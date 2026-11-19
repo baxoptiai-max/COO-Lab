@@ -7,3 +7,4 @@ CLAUDE.md
 .claude/
 tests/raw/
 tests/results-diag.md
+design-ref/

@@ -6,11 +6,11 @@
 <title>COO Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* Layout idea: one reading column; the stack picker sits above two flow diagrams that redraw with the reader's own systems. */
 :root{
-  --paper:#fafafa;
+  --paper:#f8f8f8;
   --surface:#ffffff;
   --ink:#111111;
   --muted:#5f5f66;
@@ -19,10 +19,13 @@
   --accent-ink:#4a3fc0;
   --accent-soft:#eeebff;
   --on-accent:#111111;
+  --grad:linear-gradient(90deg,#a08cf8,#f4a3f0);
+  --grad-text:linear-gradient(90deg,#5b43d6,#9b36b3);
+  --soft-a:#efe3fd; --soft-b:#f8dcf6; --btn:#e3d8fc; --halo:rgba(160,140,248,.28);
   --human:#111111;
   --human-soft:#f3f1ff;
   --ok:#2f7a3d; --warn:#9a6a00; --stop:#a3332b;
-  --display:"Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --display:"Space Grotesk", "Helvetica Neue", Arial, sans-serif;
   --body:"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
   color-scheme: light;
@@ -31,19 +34,23 @@
   :root:not([data-theme="light"]){
     --paper:#121214; --surface:#1b1b1f; --ink:#f2f2f4; --muted:#a3a3ad; --line:#2e2e35;
     --accent:#b3a9fb; --accent-ink:#c9c1ff; --accent-soft:#2a2645; --human:#f2f2f4; --human-soft:#24213a;
+    --grad-text:linear-gradient(90deg,#a08cf8,#f4a3f0); --soft-a:#2a2645; --soft-b:#38234a; --btn:#332e57; --halo:rgba(160,140,248,.35);
     --ok:#7ccb88; --warn:#e2b94f; --stop:#ef8a80; color-scheme: dark;
   }
 }
 :root[data-theme="dark"]{
   --paper:#121214; --surface:#1b1b1f; --ink:#f2f2f4; --muted:#a3a3ad; --line:#2e2e35;
   --accent:#b3a9fb; --accent-ink:#c9c1ff; --accent-soft:#2a2645; --human:#f2f2f4; --human-soft:#24213a;
+    --grad-text:linear-gradient(90deg,#a08cf8,#f4a3f0); --soft-a:#2a2645; --soft-b:#38234a; --btn:#332e57; --halo:rgba(160,140,248,.35);
   --ok:#7ccb88; --warn:#e2b94f; --stop:#ef8a80; color-scheme: dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--body)}
 main{max-width:1040px;margin:0 auto;padding:40px 20px 80px;display:grid;gap:56px}
-h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1,h2,h3{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0;line-height:1.15}
+.gt{color:var(--accent-ink)}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){.gt{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}}
 h1{font-size:clamp(34px,5vw,48px);letter-spacing:-.01em}
 h2{font-size:26px}
 h3{font-size:18px}
@@ -52,7 +59,7 @@ p{margin:0;max-width:68ch}
 .stack{display:grid;gap:14px}
 .eyebrow{font:500 13px/1 var(--mono);color:var(--accent-ink);text-transform:uppercase;letter-spacing:.06em}
 .note{font-size:14px;color:var(--muted)}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
+.card{background:linear-gradient(135deg,var(--soft-a),var(--soft-b));border:1px solid var(--line);border-radius:16px;padding:20px}
 a{color:var(--accent-ink)}
 :focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
 
@@ -66,12 +73,12 @@ a{color:var(--accent-ink)}
 
 /* flow */
 .flow{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;overflow-x:auto;padding-bottom:4px}
-.step{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:8px;padding:14px;display:grid;gap:8px;align-content:start;position:relative}
+.step{background:linear-gradient(135deg,var(--soft-a),var(--soft-b));border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:14px;padding:14px;display:grid;gap:8px;align-content:start;position:relative}
 .step.human{border-top-color:var(--human);background:var(--human-soft)}
 .step .n{font:500 12px var(--mono);color:var(--muted)}
 .step h3{font-size:16px}
 .step p{font-size:14px;color:var(--muted)}
-.sys{display:inline-block;font:500 12.5px/1.3 var(--mono);background:var(--accent-soft);color:var(--ink);border-radius:4px;padding:3px 7px;margin:2px 4px 2px 0}
+.sys{display:inline-block;font:500 12.5px/1.3 var(--mono);background:linear-gradient(135deg,var(--soft-a),var(--soft-b));color:var(--ink);border-radius:8px;padding:3px 7px;margin:2px 4px 2px 0}
 .step.human .sys{background:var(--surface)}
 .outputs{display:grid;gap:6px}
 .outputs div{font-size:13.5px}
@@ -82,21 +89,21 @@ table{border-collapse:collapse;width:100%;font-size:14.5px}
 th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font:600 13px var(--body);color:var(--muted)}
 td.num{font-variant-numeric:tabular-nums}
-.pill{display:inline-block;font:500 12px/1 var(--mono);padding:4px 7px;border-radius:999px;white-space:nowrap}
+.pill{display:inline-block;font:500 12px/1 var(--mono);padding:4px 7px;border-radius:999px;white-space:nowrap;background:var(--surface)}
 .p-ok{color:var(--ok);border:1px solid currentColor}
 .p-warn{color:var(--warn);border:1px solid currentColor}
 .p-stop{color:var(--stop);border:1px solid currentColor}
 
 /* role toggle */
-.toggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
 .toggle button{font:600 14px var(--body);padding:8px 16px;border:0;background:var(--surface);color:var(--ink);cursor:pointer}
-.toggle button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.toggle button[aria-pressed="true"]{background:var(--grad);color:var(--on-accent)}
 .rag{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:760px){.rag{grid-template-columns:1fr}}
 .src{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px}
 .src:last-child{border-bottom:0}
 .qa{display:grid;gap:10px}
-.qbtn{text-align:left;font:15px var(--body);background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:9px 12px;cursor:pointer}
+.qbtn{text-align:left;font:15px var(--body);background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:9px 12px;cursor:pointer}
 .qbtn:hover{border-color:var(--accent)}
 .answer{border-left:3px solid var(--accent);padding:6px 0 6px 12px;font-size:14.5px;min-height:72px}
 .answer.blocked{border-left-color:var(--stop)}
@@ -109,26 +116,26 @@ li{max-width:68ch}
 .phase{border-left:4px solid var(--line);padding-left:14px}
 
 /* mockup */
-.mock{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.06)}
-.mock-bar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--accent);color:var(--on-accent);font:600 14px var(--display)}
+.mock{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.mock-bar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--grad);color:var(--on-accent);font:600 14px var(--display)}
 .mono{font:500 12.5px var(--mono)}
 .mock-body{padding:20px;display:grid;gap:20px}
 .mock-mission p{font:600 18px/1.4 var(--display);max-width:60ch;margin-top:6px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-.kpi{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:4px;background:var(--paper)}
+.kpi{border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:4px;background:linear-gradient(135deg,var(--soft-a),var(--soft-b))}
 .kpi span{font-size:13px;color:var(--muted)}
 .kpi b{font:600 26px var(--display);font-variant-numeric:tabular-nums}
 .kpi small{font-size:12.5px;color:var(--muted)}
 .mock-cols{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
 @media (max-width:760px){.mock-cols{grid-template-columns:1fr}}
-.upd{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:6px}
+.upd{border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:6px}
 .upd.draft{border-color:var(--human);background:var(--human-soft)}
 .upd-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .upd textarea,.askrow input{font:14.5px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;resize:vertical}
 .btns,.askrow{display:flex;gap:8px;flex-wrap:wrap}
-.btns button,.askrow button{font:600 13.5px var(--body);border:1px solid var(--accent-ink);background:var(--surface);color:var(--accent-ink);border-radius:6px;padding:7px 12px;cursor:pointer}
+.btns button,.askrow button{font:600 13.5px var(--body);border:0;background:var(--btn);color:var(--ink);border-radius:999px;box-shadow:0 0 0 4px var(--halo);padding:8px 16px;margin:4px;cursor:pointer}
 .btns button:disabled{opacity:.45;cursor:not-allowed}
-#btnApprove:not(:disabled){background:var(--accent);color:var(--on-accent)}
+#btnApprove:not(:disabled){background:var(--grad);color:var(--on-accent)}
 .askrow input{flex:1;min-width:180px}
 .news{list-style:none;padding:0;gap:8px}
 .news li{font-size:14.5px;border-bottom:1px solid var(--line);padding-bottom:8px}
@@ -149,7 +156,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
 <header class="stack">
   <span class="eyebrow">Stage 0 · AI-Native Baseline</span>
-  <h1>COO Lab</h1>
+  <h1>COO <span class="gt">Lab</span></h1>
   <p class="lede">A working example of AI-native operations for a COO at a three-year-old bio-AI company: leadership decisions become a decision log and an action tracker, and the all-hands becomes an always-on page that leadership updates every week and everyone can ask questions. No decks or documents to send around.</p>
   <p class="note">Built by Barbara van Asten for the AI Operations / Chief of Staff application at Bioptimus. I have no view of Bioptimus's internal tools, so COO Lab is a pattern, not a product to install: it runs on the stack a company already has. All example data on this page is fictional.</p>
 </header>
@@ -162,7 +169,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
 <section class="stack" aria-labelledby="h-m1">
   <span class="eyebrow">Module 1 · Decision to action</span>
-  <h2 id="h-m1">2. From leadership meeting to action</h2>
+  <h2 id="h-m1">2. From leadership meeting to <span class="gt">action</span></h2>
   <p>Every decision gets an owner, a date, a link to a company goal and a confidentiality label. Nothing is published before the COO approves it.</p>
   <div class="flow" id="flow1"></div>
   <div class="card stack">
@@ -202,7 +209,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
 <section class="stack" aria-labelledby="h-m2">
   <span class="eyebrow">Module 2 · The all-hands page (Extend with RAG)</span>
-  <h2 id="h-m2">3. An always-on all-hands page you can ask</h2>
+  <h2 id="h-m2">3. An always-on all-hands page you can <span class="gt">ask</span></h2>
   <p>The all-hands is no longer a deck. It is one live page with vision, mission, targets, delivery status, the decision log and each leader's weekly status update. In the weekly all-hands, leadership walks through what changed on the page; between meetings, anyone can ask it a question and get an answer with its source.</p>
   <p>What the page can search depends on who is asking. Access is filtered before the model reads anything, so a colleague's question never reaches leadership-only text.</p>
   <div class="flow" id="flow2"></div>
@@ -232,7 +239,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
 <section class="stack" aria-labelledby="h-mock">
   <span class="eyebrow">Mockup</span>
-  <h2 id="h-mock">5. The always-on all-hands page</h2>
+  <h2 id="h-mock">5. The <span class="gt">always-on</span> all-hands page</h2>
   <p class="note">Concept mockup. Company news comes from Bioptimus's public website and press releases (latest first). Internal KPIs and leadership updates are placeholders, shown as [...]. Try the draft card: dictate, tidy, approve. Microphone access is off in this preview, so the dictation is simulated.</p>
   <div class="mock">
     <div class="mock-bar"><span>All-hands</span><span class="mono">Week 47 · updated Thu 19 Nov</span></div>
