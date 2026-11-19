@@ -6,6 +6,8 @@ COO Lab shows how a COO can turn leadership meetings into decisions with owners 
 
 Live link: https://coo-lab-opti-ai1.vercel.app
 
+The molecule picture in the top right corner of the page is a photo by the National Institute of Allergy and Infectious Diseases on Unsplash, recoloured to grey and violet.
+
 ## 2. How I built this
 
 I built this in one day with Claude Code, and every step is in the git history. These are the times from `git log` on 19 November 2026 (local time):
