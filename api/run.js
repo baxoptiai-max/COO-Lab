@@ -6,6 +6,7 @@
 // The keys come from the Vercel environment variables ANTHROPIC_API_KEY and OPENAI_API_KEY
 // and never reach the browser.
 
+import { applyRules, allHandsItems, leakedWords } from './_rules.js';
 import { prompts, fields, EXTRACT_MODELS, DEFAULT_EXTRACT_MODEL, EXTRACT_EFFORT, JUDGE_MODEL, PRICES } from './_prompts.js';
 
 export default async function handler(req, res) {
@@ -19,7 +20,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Gebruik GET of POST' });
 
   const { mode = 'extract', input = '', model } = req.body || {};
-  if (!Object.hasOwn(prompts, mode)) return res.status(400).json({ error: 'Onbekende modus' });
+  if (mode !== 'module1' && !Object.hasOwn(prompts, mode)) return res.status(400).json({ error: 'Onbekende modus' });
   if (!input) return res.status(400).json({ error: 'Geen invoer ontvangen' });
   if (String(input).length > 20000) return res.status(400).json({ error: 'Invoer te lang voor de demo' });
 
@@ -29,6 +30,7 @@ export default async function handler(req, res) {
 
   try {
     const started = Date.now();
+    if (mode === 'module1') return res.status(200).json(await module1(useModel, input, started));
     const result = mode === 'judge'
       ? await callOpenAI(useModel, prompts[mode], input)
       : await callAnthropic(useModel, prompts[mode], input);
@@ -109,4 +111,23 @@ function costOf(model, usage) {
   const p = PRICES[model];
   if (!p || !usage) return null;
   return ((usage.prompt_tokens || 0) * p.in + (usage.completion_tokens || 0) * p.out) / 1e6;
+}
+
+// Module 1: extract decisions, check them in code, then write the all-hands text from cleared items only.
+async function module1(model, transcript, started) {
+  const first = await callAnthropic(model, prompts.extract, transcript);
+  if (first.error) return { error: first.error };
+  const { decisions, dropped, notes } = applyRules(parseJson(first.text));
+  const cleared = allHandsItems(decisions);
+  let allHands = null, usage = first.usage;
+  if (cleared.length) {
+    const second = await callAnthropic(model, prompts.allhands, JSON.stringify(cleared));
+    if (second.error) return { error: second.error };
+    usage = { prompt_tokens: usage.prompt_tokens + second.usage.prompt_tokens, completion_tokens: usage.completion_tokens + second.usage.completion_tokens };
+    const text = parseJson(second.text).text || null;
+    const leaked = text ? leakedWords(text, decisions) : [];
+    if (leaked.length) notes.push(`All-hands text withheld: it mentions words from items that are not cleared (${leaked.join(', ')}).`);
+    else allHands = text;
+  } else notes.push('No item is both agreed and labelled all_hands, so there is no all-hands text.');
+  return { mode: 'module1', model, decisions, dropped, notes, all_hands: allHands, usage, ms: Date.now() - started, cost_usd: costOf(model, usage) };
 }

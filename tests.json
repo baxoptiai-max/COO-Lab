@@ -1,4 +1,227 @@
 {
-  "toelichting": "Placeholder: voeg testcasussen toe met input en expected, met dezelfde veldnamen als api/_prompts.js.",
-  "cases": []
+  "toelichting": "FICTIONAL: seven invented Helix Labs meeting transcripts for Module 1. Every name, figure and company is made up. 'expected' = the decisions the system should end up with after the rule checks (decision is matched by meaning; flags are checked by decision_contains). 'all_hands_must_exclude' = terms that must never appear in the all-hands text.",
+  "cases": [
+    {
+      "name": "1 Normal: onboarding and pricing",
+      "note": "Two clean decisions with owner and date.",
+      "input": "[FICTIONAL: Helix Labs is an invented company; all people and figures are made up.]\nMara: Thanks all. Three topics today: onboarding, pricing page, hiring.\nJon: Onboarding first. Trial users drop off at the data-import step.\nMara: What do we do about it?\nJon: I propose a guided import wizard. It delays the reporting feature by about two weeks.\nPriya: I can live with that delay. Activation is our Q2 goal, so this is the priority.\nMara: Agreed. Jon owns the wizard, ready by 28 April.\nJon: Fine. I'll share the plan in the all-hands as well.\nMara: Good. Next, the pricing page.\nPriya: Customers are confused by three plans. I'd cut it to two: Team and Business.\nLena: Sales is fine with that, as long as we keep the annual discount.\nMara: Decision: two plans from 1 May, Priya owns the page. Annual discount stays.\nPriya: The trade-off is that we lose the cheap Starter plan and some small customers.\nMara: Accepted. That one can go in the all-hands too.\nJon: Hiring?\nMara: Nothing to decide today, we look again next week.\nMara: Thanks everyone.",
+      "expected": {
+        "decisions": [
+          {
+            "decision": "guided data-import wizard",
+            "owner": "Jon",
+            "due_date": "28 April",
+            "label": "all_hands",
+            "status": "agreed",
+            "goal_or_okr": "Q2 activation",
+            "trade_off": "reporting feature delayed about two weeks"
+          },
+          {
+            "decision": "move from three plans to two (Team and Business)",
+            "owner": "Priya",
+            "due_date": "1 May",
+            "label": "all_hands",
+            "status": "agreed",
+            "trade_off": "lose Starter plan and some small customers"
+          }
+        ],
+        "flags": [],
+        "all_hands_must_exclude": [],
+        "comment": "Hiring is open with no decision; it must not appear as a decision."
+      }
+    },
+    {
+      "name": "2 Normal: support and roadmap",
+      "note": "Two clean decisions, one leadership-only.",
+      "input": "[FICTIONAL: Helix Labs is an invented company; all people and figures are made up.]\nMara: Let's start with support load.\nLena: Tickets are up 30 percent since the launch.\nJon: Most are about export. A fix is two days of work.\nMara: Then do it. Jon owns the export fix, done by Friday 14 March.\nLena: And I'd like a status page so customers stop writing in.\nMara: Yes. Lena owns the status page, live by 21 March.\nPriya: Goal is to bring tickets under 400 a month, that is the support OKR.\nMara: Good. Now the roadmap.\nPriya: Option one, mobile app. Option two, API v2. I'd say API v2 first, it unlocks two partners.\nJon: The mobile app waits until Q4 then.\nMara: Decision for leadership only, we don't announce it yet: API v2 first, owner Priya, start in April.\nPriya: The cost is that the mobile app slips to Q4.\nMara: Yes. Keep it inside this group until partners are told.\nLena: Understood.\nMara: That's it for today.",
+      "expected": {
+        "decisions": [
+          {
+            "decision": "fix the export problem",
+            "owner": "Jon",
+            "due_date": "14 March",
+            "label": "all_hands",
+            "status": "agreed",
+            "goal_or_okr": "support OKR: under 400 tickets a month"
+          },
+          {
+            "decision": "build a customer status page",
+            "owner": "Lena",
+            "due_date": "21 March",
+            "label": "all_hands",
+            "status": "agreed",
+            "goal_or_okr": "support OKR: under 400 tickets a month"
+          },
+          {
+            "decision": "build API v2 before the mobile app",
+            "owner": "Priya",
+            "due_date": "April",
+            "label": "leadership_only",
+            "status": "agreed",
+            "trade_off": "mobile app slips to Q4"
+          }
+        ],
+        "flags": [],
+        "all_hands_must_exclude": [
+          "API v2"
+        ]
+      }
+    },
+    {
+      "name": "3 Decision without owner",
+      "note": "Nobody takes the security review.",
+      "input": "[FICTIONAL: Helix Labs is an invented company; all people and figures are made up.]\nMara: Security questionnaire from the Orbit account came in again.\nLena: They want proof of an external security review before signing.\nJon: We should do one. It costs about the same as one month of cloud spend.\nPriya: Agreed, we need it for enterprise deals anyway.\nMara: So we decide: we get an external security review before the end of Q3.\nLena: Who runs it?\nMara: Let's see. Someone should pick it up.\nJon: I'm busy with the release.\nPriya: Me too, until June.\nMara: OK, we leave the owner for now.\nLena: Next topic: office move.\nMara: Lease ends in August. Decision: we stay in the current office another year, Lena handles it with the landlord by 30 June.\nLena: Fine.\nMara: Share the office news in the all-hands.\nJon: Anything else?\nMara: No. Thanks.",
+      "expected": {
+        "decisions": [
+          {
+            "decision": "get an external security review",
+            "owner": null,
+            "due_date": "end of Q3",
+            "label": "leadership_only",
+            "status": "agreed"
+          },
+          {
+            "decision": "stay in the current office another year",
+            "owner": "Lena",
+            "due_date": "30 June",
+            "label": "all_hands",
+            "status": "agreed"
+          }
+        ],
+        "flags": [
+          {
+            "decision_contains": "security review",
+            "flag": "missing_owner"
+          }
+        ],
+        "all_hands_must_exclude": [
+          "security review"
+        ]
+      }
+    },
+    {
+      "name": "4 Decision reversed later",
+      "note": "Webinar series is agreed, then cancelled.",
+      "input": "[FICTIONAL: Helix Labs is an invented company; all people and figures are made up.]\nMara: Marketing plan for the autumn.\nPriya: I'd like a monthly webinar series starting in September.\nLena: Sales likes it. Leads from webinars convert well.\nMara: Decision: monthly webinar series, Priya owns it, first one 10 September.\nJon: Who hosts them? Engineering has no time.\nPriya: Then I'd need a freelancer.\nMara: Hmm. Budget for the freelancer is not there.\nLena: Without it Priya runs everything alone.\nPriya: That is not realistic next to the website work.\nMara: You're right. Reversing that: no webinar series this autumn.\nMara: Instead we write one case study per month. Priya owns it, first one by 15 September.\nLena: Good, I can bring two customers.\nPriya: The trade-off is less live contact with prospects.\nMara: Accepted.\nJon: Fine by me.\nMara: Share the case-study plan with everyone, please.\nPriya: Will do.",
+      "expected": {
+        "decisions": [
+          {
+            "decision": "write one customer case study per month",
+            "owner": "Priya",
+            "due_date": "15 September",
+            "label": "all_hands",
+            "status": "agreed",
+            "trade_off": "less live contact with prospects"
+          }
+        ],
+        "flags": [],
+        "all_hands_must_exclude": [
+          "webinar"
+        ],
+        "comment": "The webinar decision is reversed and must not appear as an active decision."
+      }
+    },
+    {
+      "name": "5 Same decision mentioned twice",
+      "note": "The support-hours decision comes up at the start and again at the end.",
+      "input": "[FICTIONAL: Helix Labs is an invented company; all people and figures are made up.]\nMara: First item: support hours.\nLena: Customers in the US write at night. I propose extended support until 20:00.\nJon: That means a late shift. Who covers it?\nLena: Two of my team volunteered, I own the rollout.\nMara: Decision: extend support hours until 20:00 starting 5 May, Lena owns it.\nPriya: Does that touch the OKR?\nLena: Yes, first response time under four hours is the Q2 support goal.\nMara: Good. Second item: the blog redesign.\nPriya: I'd postpone it until after summer so we can finish the docs.\nMara: Decision: postpone the blog redesign to September, Priya owns it.\nJon: Fine.\nPriya: Any other business?\nLena: Just to confirm, support runs until 20:00 from the fifth of May, right?\nMara: Yes, extended support until eight in the evening from 5 May, Lena.\nJon: Great, then we're done.\nMara: Thanks everyone.",
+      "expected": {
+        "decisions": [
+          {
+            "decision": "extend support hours until 20:00",
+            "owner": "Lena",
+            "due_date": "5 May",
+            "label": "all_hands",
+            "status": "agreed",
+            "goal_or_okr": "Q2 support goal: first response under four hours"
+          },
+          {
+            "decision": "postpone the blog redesign",
+            "owner": "Priya",
+            "due_date": "September",
+            "label": "all_hands",
+            "status": "agreed"
+          }
+        ],
+        "flags": [
+          {
+            "decision_contains": "support hours",
+            "flag": "merged_duplicate"
+          }
+        ],
+        "all_hands_must_exclude": []
+      }
+    },
+    {
+      "name": "6 Board item next to a product decision",
+      "note": "Fundraising talk must not reach the all-hands text.",
+      "input": "[FICTIONAL: Helix Labs is an invented company; all people and figures are made up.]\nMara: Two things: the Series A and the dashboard launch.\nMara: Board only for now: we start Series A talks in June with two lead investors. Target raise is 12 million.\nLena: Who talks to the investors?\nMara: I do. Nothing of this goes outside this room, not even to the team.\nJon: Understood. And the valuation range?\nMara: Also board only. We don't discuss it beyond this call.\nPriya: OK. Now the dashboard.\nPriya: The new dashboard is ready for beta. I'd open it to all customers on 2 June.\nJon: Support needs a week to prepare.\nPriya: Then 9 June.\nMara: Decision: the new dashboard launches to all customers on 9 June. Priya owns the launch.\nPriya: It supports the Q2 goal of weekly active users.\nJon: The trade-off is that we freeze other front-end work for a month.\nMara: Yes, accepted. Tell the whole company about the dashboard.\nLena: I'll draft the customer email.\nMara: Fine. Series A stays quiet.\nPriya: Agreed.\nMara: Thanks.",
+      "expected": {
+        "decisions": [
+          {
+            "decision": "start Series A talks with two lead investors",
+            "owner": "Mara",
+            "due_date": "June",
+            "label": "board_only",
+            "status": "agreed"
+          },
+          {
+            "decision": "launch the new dashboard to all customers",
+            "owner": "Priya",
+            "due_date": "9 June",
+            "label": "all_hands",
+            "status": "agreed",
+            "goal_or_okr": "Q2 weekly active users",
+            "trade_off": "other front-end work frozen for a month"
+          }
+        ],
+        "flags": [],
+        "all_hands_must_exclude": [
+          "Series A",
+          "investors",
+          "12 million",
+          "valuation"
+        ]
+      }
+    },
+    {
+      "name": "7 Misheard model or partner name",
+      "note": "Names are written wrong in the transcript; flag low confidence, do not correct.",
+      "input": "[FICTIONAL: Helix Labs is an invented company; all people and figures are made up.]\nMara: Next topic: the model for the summary feature.\nJon: I tested Claude Sonet and it was good enough. The cost is about half of what we pay now.\nPriya: And the other option was Gemmini Flash?\nJon: Yes, but quality was lower on long documents.\nMara: Decision: we move the summary feature to Claude Sonet. Jon owns the switch, done by 20 June.\nJon: The trade-off is that we depend on one vendor for summaries.\nMara: Accepted.\nLena: Partner news: we sign with Dataflo, or Dataflow, I can't read my notes.\nMara: Dataflo, I think. Decision: Lena owns the partner announcement draft, due 15 June.\nLena: I'll check the right spelling with them first.\nPriya: Please do, before anything goes out.\nJon: For the summary model, I'll run a last quality check before the switch.\nMara: Good. Share the summary model change with the team after the switch.\nJon: Will do.\nLena: The partner draft stays inside leadership until it is signed.\nMara: Thanks all.",
+      "expected": {
+        "decisions": [
+          {
+            "decision": "move the summary feature to Claude Sonet",
+            "owner": "Jon",
+            "due_date": "20 June",
+            "label": "all_hands",
+            "status": "agreed",
+            "trade_off": "depend on one vendor for summaries",
+            "low_confidence": true
+          },
+          {
+            "decision": "draft the partner announcement for Dataflo",
+            "owner": "Lena",
+            "due_date": "15 June",
+            "label": "leadership_only",
+            "status": "agreed",
+            "low_confidence": true
+          }
+        ],
+        "flags": [
+          {
+            "decision_contains": "summary feature",
+            "flag": "low_confidence"
+          },
+          {
+            "decision_contains": "partner announcement",
+            "flag": "low_confidence"
+          }
+        ],
+        "all_hands_must_exclude": [
+          "Dataflo"
+        ]
+      }
+    }
+  ]
 }

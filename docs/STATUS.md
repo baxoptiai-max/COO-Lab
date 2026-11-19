@@ -1,7 +1,7 @@
 # Status
 
-Copied from ai-usecase-kit; Voltara/Gaide content, _private and git history removed. Not deployed.
+Module 1 built (decision log): schema in api/_prompts.js, rule checks in api/_rules.js, server mode "module1" in api/run.js, 7 fictional Helix Labs tests in tests.json, Try-it box on the page.
 
-Kept: api/run.js, test runner and Demo tab in index.html.
+Not yet tested against the real model (no keys locally); rules and server flow tested with a stubbed model. Not deployed.
 
-Next: choose the new case; rewrite api/_prompts.js and tests.json; adapt Demo JS (still expects berichttype/advies/concept fields); recreate _private/forbidden-terms.txt for scripts/check-confidential.sh.
+Next: deploy, run the 7 tests on the live link, tune the prompt. Parked: page test runner for tests.json; scripts/check-confidential.sh needs _private/forbidden-terms.txt.
