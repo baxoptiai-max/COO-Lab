@@ -202,6 +202,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
       <h3>All-hands paragraph</h3>
       <p class="note">Written only from items that are agreed and labelled all_hands.</p>
       <p id="tryAllHands"></p>
+      <details id="tryHeld" hidden><summary>Show the withheld text for review</summary><p id="tryHeldText" class="note"></p></details>
       <p class="note" id="tryInfo"></p>
     </div>
   </div>
@@ -562,7 +563,9 @@ buildPicker(); render();
       const f = cell('td', ''); for (const k of x.flags) f.append(pillEl(FLAGS[k] || k, 'p-warn')); r.append(f);
     }
     $('tryNotes').replaceChildren(...d.notes.map(n => cell('li', n)));
-    $('tryAllHands').textContent = d.all_hands || 'No all-hands text for this transcript.';
+    const held = d.withheld;
+    $('tryAllHands').textContent = d.all_hands || (held ? 'Withheld for review. ' + held.reason + ' Matched: ' + held.words.join(', ') + '.' : 'No all-hands text for this transcript.');
+    $('tryHeld').hidden = !held; $('tryHeldText').textContent = held ? held.text : '';
     $('tryInfo').textContent = `${d.model} \u00b7 ${(d.ms / 1000).toFixed(1)} s \u00b7 $ ${(d.cost_usd ?? 0).toFixed(4)}`;
     $('tryResult').hidden = false;
   }

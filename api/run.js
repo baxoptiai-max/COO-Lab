@@ -101,15 +101,18 @@ async function module1(model, transcript, started, debug = false) {
   const extracted = parseJson(first.text);
   const { decisions, dropped, notes } = applyRules(extracted);
   const cleared = allHandsItems(decisions);
-  let allHands = null, usage = first.usage;
+  let allHands = null, withheld = null, usage = first.usage;
   if (cleared.length) {
     const second = await callAnthropic(model, prompts.allhands, JSON.stringify(cleared));
     if (second.error) return { error: second.error };
     usage = { prompt_tokens: usage.prompt_tokens + second.usage.prompt_tokens, completion_tokens: usage.completion_tokens + second.usage.completion_tokens };
     const text = parseJson(second.text).text || null;
-    const leaked = text ? leakedWords(text, decisions) : [];
-    if (leaked.length) notes.push(`All-hands text withheld: it mentions words from items that are not cleared (${leaked.join(', ')}).`);
-    else allHands = text;
+    const leaked = text ? leakedWords(text, decisions, dropped) : [];
+    if (leaked.length) {
+      // Safety net: keep the text out of the answer, but hand it back with the reason so the COO can review and release it.
+      notes.push(`All-hands text withheld: it contains words from items that are not cleared (${leaked.join(', ')}). Review it before sharing.`);
+      withheld = { reason: 'Contains words from items that are not cleared for all-hands.', words: leaked, text };
+    } else allHands = text;
   } else notes.push('No item is both agreed and labelled all_hands, so there is no all-hands text.');
-  return { mode: 'module1', model, decisions, dropped, notes, all_hands: allHands, usage, ms: Date.now() - started, cost_usd: costOf(model, usage), ...(debug ? { raw_extraction: extracted } : {}) };
+  return { mode: 'module1', model, decisions, dropped, notes, all_hands: allHands, withheld, usage, ms: Date.now() - started, cost_usd: costOf(model, usage), ...(debug ? { raw_extraction: extracted } : {}) };
 }

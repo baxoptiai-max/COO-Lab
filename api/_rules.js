@@ -67,15 +67,18 @@ export const allHandsItems = decisions => decisions
   .filter(d => d.label === 'all_hands' && d.status === 'agreed')
   .map(({ decision, owner, due_date, goal_or_okr }) => ({ decision, owner, due_date, goal_or_okr }));
 
-// Leak check on the written text: words that only occur in non-cleared items must not appear in it.
-export function leakedWords(text, decisions) {
-  const cleared = new Set(); allHandsItems(decisions).forEach(i => words(JSON.stringify(i)).forEach(w => cleared.add(w)));
-  const own = new Set(words(text));
+// Leak check on the written text: any distinctive word (5+ letters, not a common word) from a non-cleared item must not
+// appear in it, even when a cleared item uses the same word. Dropped (reversed) items count as non-cleared.
+const COMMON = new Set(['about','after','again','agreed','allow','also','around','because','before','being','between','both','could','decision','doing','during','each','every','first','from','have','having','into','item','items','just','later','less','make','making','more','most','much','must','need','next','other','others','over','plan','plans','should','since','some','start','still','such','team','than','that','their','them','then','there','these','they','this','those','through','under','until','update','using','want','were','what','when','where','which','while','will','with','within','without','work','would','your','january','february','march','april','june','july','august','september','october','november','december','monday','tuesday','wednesday','thursday','friday','saturday','sunday']);
+// Compare words without a plural ending, so "webinars" matches "webinar".
+const stem = w => w.replace(/ies$/, 'y').replace(/s$/, '');
+export function leakedWords(text, decisions, dropped = []) {
+  const own = new Set(words(text).map(stem));
   const out = new Set();
-  for (const d of decisions) {
-    if (d.label === 'all_hands' && d.status === 'agreed') continue;
-    for (const w of words(`${d.decision} ${d.trade_off || ''} ${d.goal_or_okr || ''}`)) {
-      if ((w.length >= 6 || /\d/.test(w)) && !STOP.has(w) && !cleared.has(w) && own.has(w)) out.add(w);
+  const others = [...decisions.filter(d => !(d.label === 'all_hands' && d.status === 'agreed')), ...dropped];
+  for (const d of others) {
+    for (const w of words(`${d.decision || ''} ${d.trade_off || ''} ${d.goal_or_okr || ''}`)) {
+      if (/^[a-z]{5,}$/.test(w) && !COMMON.has(w) && own.has(stem(w))) out.add(w);
     }
   }
   return [...out];
