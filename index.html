@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>COO-Lab</title>
+  <style>
+    /* Colours: palette. */
+    :root {
+      --marine: #060026;       
+      --orange: #fa6339;       
+      --orange-hover: #dd4a20; 
+      --tint: #e8f2ff;         
+      --tint-border: #c9dcfb;
+      --bg: #f6f5f2;            /* very light warm grey page background */
+      --line: #e4e2dc;          /* subtle card border */
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Let Tailwind classes use the colour variables above (e.g. bg-marine, bg-accent, border-line).
+    tailwind.config = { theme: { extend: { colors: {
+      marine: 'var(--marine)', accent: 'var(--orange)', 'accent-hover': 'var(--orange-hover)',
+      tint: 'var(--tint)', line: 'var(--line)', page: 'var(--bg)'
+    } } } };
+  </script>
+  <style>
+    /* White cards with a subtle border; headings in marine; grey placeholder text (readable: 4.7:1 on white). */
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 0.75rem; padding: 1rem 1.25rem; }
+    .card h2 { font-size: 1.0625rem; font-weight: 600; color: var(--marine); }
+    .ph { margin-top: 0.25rem; color: #64748b; }
+    /* Reasoning box: light marine tint with a lightbulb, so it differs from the grey placeholders */
+    .why { position: relative; margin-top: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2.25rem; background: var(--tint); border: 1px solid var(--tint-border); border-radius: 0.5rem; font-size: 0.875rem; color: var(--marine); }
+    .why::before { content: "💡"; position: absolute; left: 0.75rem; top: 0.5rem; }
+    .why b { font-weight: 600; }
+    /* Reasoning box in the advisory style: speaks to the reader directly, numbers in bold, small source line at the bottom */
+    .why-erik p + p { margin-top: 0.5rem; }
+    .why-erik .why-title { font-weight: 600; font-size: 0.9375rem; }
+    .why-erik .why-bron { font-size: 0.75rem; color: #475569; }
+    body.no-why .why { display: none; }
+    /* The one sentence each tab opens with */
+    .lead { font-size: 1.125rem; font-weight: 500; color: var(--marine); }
+    .lead-lg { font-size: 1.25rem; line-height: 1.5; }
+    /* Chain diagram (tab 1) */
+    .k-box { fill: #fff; stroke: var(--marine); stroke-width: 1.5; }
+    .k-name { font: 600 11.5px system-ui, sans-serif; fill: var(--marine); }
+    .k-arrow { stroke: var(--marine); stroke-width: 1.5; }
+    .k-bad { font: 10.5px system-ui, sans-serif; fill: #b91c1c; }
+    .k-good { font: 10.5px system-ui, sans-serif; fill: #047857; }
+    .k-bron { font: 9.5px system-ui, sans-serif; fill: #475569; text-decoration: underline; cursor: pointer; }
+    .k-bron:hover, .k-bron:focus { fill: var(--marine); outline: none; }
+    /* Timeline (tab 2) */
+    .t-month { font: 600 12px system-ui, sans-serif; fill: var(--marine); }
+    .t-lane { font: 600 11px system-ui, sans-serif; fill: #475569; }
+    .t-moet { fill: #f1f5f9; stroke: #cbd5e1; }
+    .t-intake { fill: var(--tint); stroke: var(--tint-border); }
+    .t-text { font: 10.5px system-ui, sans-serif; fill: #1e293b; }
+    .t-mile { font: 600 10.5px system-ui, sans-serif; fill: var(--marine); }
+    /* Process flows today / January (tab 3) */
+    .s-box { fill: #fff; stroke: var(--marine); stroke-width: 1.25; }
+    .s-box-new { fill: #fff; stroke: #059669; stroke-width: 1.5; }
+    .s-name { font: 600 10.5px system-ui, sans-serif; fill: var(--marine); }
+    .s-title { font: 600 12px system-ui, sans-serif; fill: var(--marine); }
+    .s-title-new { fill: #047857; }
+    .s-line { font: 10px system-ui, sans-serif; fill: #334155; }
+    .s-wait { font: 600 10px system-ui, sans-serif; fill: #b91c1c; }
+    .s-ai { font: 10px system-ui, sans-serif; fill: #047857; }
+    .s-ok { font: 10px system-ui, sans-serif; fill: #047857; }
+    .s-total { font: 600 11px system-ui, sans-serif; fill: var(--marine); }
+    .s-arrow { stroke: var(--marine); stroke-width: 1.25; }
+    .reden-btn[aria-pressed="true"] { background: var(--marine); color: #fff; border-color: var(--marine); font-weight: 600; }
+    /* One-line explanation under a card title */
+    .why-regel { margin-top: 0.375rem; padding-top: 0.25rem; padding-bottom: 0.25rem; font-size: 0.8125rem; }
+    .why-regel::before { top: 0.25rem; }
+    /* Source label next to a sentence */
+    .bron-btn { font-size: 0.75rem; color: #475569; text-decoration: underline; text-underline-offset: 2px; }
+    .bron-btn:hover { color: var(--marine); }
+    /* Phones: wide tables marked .stack-sm become stacked blocks, one card per row with the column name above
+       each value, so nothing falls off the screen. Desktop is unchanged. */
+    @media (max-width: 639px) {
+      table.stack-sm, table.stack-sm tbody, table.stack-sm tr, table.stack-sm th, table.stack-sm td { display: block; width: 100%; }
+      table.stack-sm thead, table.stack-sm tr.stack-head { display: none; }
+      table.stack-sm { border: 0; min-width: 0; }
+      table.stack-sm tr { border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.5rem 0.75rem; margin-top: 0.5rem; }
+      table.stack-sm th, table.stack-sm td { padding: 0.25rem 0; }
+      table.stack-sm tr > :first-child { font-weight: 600; color: var(--marine); }
+      table.stack-sm td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; font-weight: 600; color: #475569; }
+    }
+    /* Key numbers: marine text with an orange underline (orange text itself is too light to read). */
+    .keynum { font-weight: 600; color: var(--marine); box-shadow: inset 0 -2px 0 var(--orange); }
+  </style>
+</head>
+<body class="bg-page text-slate-800 font-sans">
+
+  <header class="bg-marine text-white">
+    <div class="mx-auto max-w-[1000px] px-4 py-6">
+      <h1 class="text-2xl sm:text-3xl font-semibold">COO-Lab</h1>
+      <p class="mt-2 text-base sm:text-lg text-white/85">Demo: plak een invoer, de assistent haalt de velden eruit, een medewerker keurt goed of past aan.</p>
+      <!-- The advice boxes ("Toelichting") are shown by default; remove "checked" from the checkbox to hide them at the start. -->
+      <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+        <label class="flex flex-wrap items-center gap-x-2 text-sm text-white/90 cursor-pointer">
+          <input type="checkbox" id="showWhy" checked class="accent-[var(--orange)]"> Toelichting
+          <span class="w-full pl-6 text-xs text-white/70 sm:w-auto sm:pl-0">(waarom we dit adviseren, met cijfers en bronnen)</span>
+        </label>
+        <button type="button" id="openGlossary" class="text-sm text-white underline decoration-[var(--orange)] decoration-2 underline-offset-4 hover:text-white/80">Begrippenlijst</button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- The tabs, one per deliverable of the case. data-tab says which section each button opens. -->
+  <div class="bg-white border-b border-line">
+    <nav class="mx-auto max-w-[1000px] px-4 flex flex-wrap gap-x-4 text-sm" role="tablist">
+
+
+
+      <button data-tab="prototype" role="tab" class="tab py-3 -mb-px border-b-[3px] border-transparent text-marine opacity-70 aria-selected:opacity-100 aria-selected:font-semibold aria-selected:border-accent">4 Prototype</button>
+
+
+
+    </nav>
+  </div>
+
+  <main class="mx-auto max-w-[1000px] px-4 py-5">
+    <!-- Each tab opens with one sentence (.lead) and fits on about one screen. -->
+
+    <!-- Tab 4: Prototype: one storingsmelding in, fields + what is missing out, two concepts a person approves. -->
+    <section data-panel="prototype" class="hidden space-y-4">
+      <p class="lead lead-lg">Invoer erin, de assistent zoekt uit wat ontbreekt, de medewerker keurt goed.</p>
+      <div class="why why-erik">
+        <p class="why-title">Wat u hier ziet</p>
+        <p>Plak een invoertekst en u ziet wat de medewerker krijgt. Er gaat niets naar buiten zonder goedkeuring.</p>
+        <p class="why-bron">Bron: testset en prototype.</p>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="card">
+          <h2><label for="input">Binnenkomende melding</label></h2>
+        <div class="why why-erik why-regel"><p>Waarom dit hier staat: u kunt zelf een klantmail uitproberen.</p></div>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <button type="button" data-voorbeeld="1" class="rounded-lg border border-line bg-white px-3 py-1.5 text-sm text-marine hover:bg-tint">Voorbeeld: onvolledige melding</button>
+            <button type="button" data-voorbeeld="0" class="rounded-lg border border-line bg-white px-3 py-1.5 text-sm text-marine hover:bg-tint">Voorbeeld: complete melding</button>
+          </div>
+          <textarea id="input" rows="9" class="mt-2 w-full p-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-accent" placeholder="Plak hier een storingsmail of telefoonnotitie van een klant."></textarea>
+          <div class="mt-2 flex flex-wrap items-center gap-3">
+            <button id="run" class="px-4 py-2 rounded-lg bg-accent text-marine font-medium hover:bg-accent-hover disabled:opacity-60">Melding uitlezen</button>
+            <!-- The options come from the server (api/_prompts.js) -->
+            <label class="text-sm text-slate-600">Model
+              <select id="demoModel" data-models class="ml-1 p-1.5 border border-slate-300 rounded bg-white"></select>
+            </label><span data-term="Haiku / Sonnet" class="-ml-3"></span>
+          </div>
+          <p class="mt-2 text-xs text-slate-500">Alleen verzonnen testmails gebruiken; geen echte klantgegevens.</p>
+        </div>
+
+        <div class="card">
+          <h2>Wat de assistent ervan maakt</h2>
+        <div class="why why-erik why-regel"><p>Waarom dit hier staat: u ziet wat de assistent uit de mail haalt.</p></div>
+          <p id="status" class="ph">Het resultaat verschijnt hier.</p>
+          <!-- Filled in by the script after "Melding uitlezen" -->
+          <div id="result" class="hidden">
+            <div id="badge" class="mt-2 rounded border px-3 py-2 text-sm"></div>
+            <p id="ontbreekt" class="mt-2 text-sm"></p>
+            <div id="fields" class="mt-3 grid gap-x-3 gap-y-2 sm:grid-cols-2"></div>
+            <details class="mt-3 text-sm text-slate-600">
+              <summary class="cursor-pointer">Toon ruwe JSON</summary>
+              <pre id="raw" class="mt-2 p-3 text-xs bg-slate-50 rounded whitespace-pre-wrap break-words"></pre>
+            </details>
+            <p id="tokens" class="mt-2 text-xs text-slate-500"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="card">
+          <h2>Conceptvraag aan klant</h2>
+        <div class="why why-erik why-regel"><p>Waarom dit hier staat: de medewerker keurt dit concept goed voordat het weggaat.</p></div>
+          <p id="vraagLeeg" class="ph text-sm">Verschijnt als er iets ontbreekt.</p>
+          <div id="vraagBlok" class="hidden">
+            <textarea id="vraagTekst" rows="7" class="mt-2 w-full p-2 text-sm border border-slate-300 rounded focus:outline-none focus:border-accent"></textarea>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button type="button" id="vraagOk" class="px-4 py-2 rounded-lg bg-accent text-marine font-medium hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed">Goedkeuren</button>
+              <button type="button" id="vraagAangepast" class="px-4 py-2 rounded-lg border border-marine text-marine hover:bg-tint disabled:opacity-40 disabled:cursor-not-allowed">Aanpassen en goedkeuren</button>
+            </div>
+            <div id="vraagBevestiging" class="hidden mt-2 rounded border border-emerald-200 bg-emerald-50 p-2 text-sm text-emerald-900"></div>
+            <div class="mt-2 space-y-0.5 text-xs">
+              <p class="text-emerald-700">✓ Beheerd sjabloon gebruikt (UV-01, versie 2026-11, eigenaar teamlead klantenservice)</p>
+              <p id="vraagAudit" class="hidden text-emerald-700"></p>
+              <p class="pt-0.5 text-slate-500">Ontworpen om aan te sluiten op de beheersing van gedocumenteerde informatie (ISO 9001, §7.5). Conformiteit stelt de auditor vast.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Concept-werkorder voor planner</h2>
+        <div class="why why-erik why-regel"><p>Waarom dit hier staat: de planner krijgt de werkorder voorbereid.</p></div>
+          <p id="werkorderLeeg" class="ph text-sm">Verschijnt als de melding compleet is.</p>
+          <div id="werkorderBlok" class="hidden">
+            <textarea id="werkorderTekst" rows="7" class="mt-2 w-full p-2 text-sm border border-slate-300 rounded focus:outline-none focus:border-accent"></textarea>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button type="button" id="werkorderOk" class="px-4 py-2 rounded-lg bg-accent text-marine font-medium hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed">Goedkeuren</button>
+              <button type="button" id="werkorderAangepast" class="px-4 py-2 rounded-lg border border-marine text-marine hover:bg-tint disabled:opacity-40 disabled:cursor-not-allowed">Aanpassen en goedkeuren</button>
+            </div>
+            <div id="werkorderBevestiging" class="hidden mt-2 rounded border border-emerald-200 bg-emerald-50 p-2 text-sm text-emerald-900"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback on the concept: front-end only, nothing is stored. Shown after "Melding uitlezen", reset on every new run. -->
+      <div id="feedbackBlok" class="card hidden">
+        <h2 class="!text-base">Klopt het concept niet? Geef de reden door</h2>
+        <div class="why why-erik why-regel"><p>Waarom dit hier staat: zo kan de assistent van het team leren.</p></div>
+        <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Reden waarom het concept niet klopt">
+          <button type="button" data-reden="Veld fout" aria-pressed="false" class="reden-btn rounded-lg border border-line bg-white px-3 py-1.5 text-sm text-marine hover:bg-tint">Veld fout</button>
+          <button type="button" data-reden="Toon niet goed" aria-pressed="false" class="reden-btn rounded-lg border border-line bg-white px-3 py-1.5 text-sm text-marine hover:bg-tint">Toon niet goed</button>
+          <button type="button" data-reden="Er ontbreekt iets" aria-pressed="false" class="reden-btn rounded-lg border border-line bg-white px-3 py-1.5 text-sm text-marine hover:bg-tint">Er ontbreekt iets</button>
+          <button type="button" data-reden="Advies klopt niet" aria-pressed="false" class="reden-btn rounded-lg border border-line bg-white px-3 py-1.5 text-sm text-marine hover:bg-tint">Advies klopt niet</button>
+        </div>
+        <p id="feedbackDank" class="mt-2 hidden rounded border border-emerald-200 bg-emerald-50 p-2 text-sm text-emerald-900">Dank je. In deze demo wordt niets opgeslagen.</p>
+      </div>
+
+      <!-- Advice to the employee: shown after "Melding uitlezen". Colour by advice. -->
+      <div id="adviesBlok" class="hidden rounded-lg border px-4 py-3">
+        <p class="text-sm"><span class="font-semibold">Advies aan de medewerker:</span> <strong id="adviesTekst"></strong></p>
+        <p class="mt-1 text-sm"><span class="font-semibold">Waarom:</span> <span id="adviesWaarom"></span></p>
+        <p class="mt-1 text-xs opacity-80">Jij beslist.</p>
+      </div>
+
+      <details class="card">
+        <summary class="cursor-pointer text-[1.0625rem] font-semibold text-marine">Testresultaten en modelvergelijking</summary>
+        <div class="why why-erik why-regel"><p>Waarom dit hier staat: u ziet hoe goed de assistent werkt.</p></div>
+        <p class="ph"><span data-term="Testset">10 verzonnen testmails</span> uit tests.json, van compleet tot "hij piept"; namen, adressen en merken zijn fictief. Elk veld wordt in code gecontroleerd; het advies wordt ook in code vergeleken; de <span data-term="Controlereden">reden</span>, de waarom-tekst en de twee concepten krijgen een score van een <span data-term="Beoordelaar">onafhankelijke beoordelaar</span>. Slagen kan alleen als berichttype in elke casus klopt.</p>
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+          <label class="text-sm text-slate-600">Model
+            <select id="testModel" data-models class="ml-1 p-1.5 border border-slate-300 rounded bg-white"></select>
+          </label><span data-term="Haiku / Sonnet" class="-ml-3"></span>
+          <button id="runTests" class="px-4 py-2 rounded-lg bg-accent text-marine font-medium hover:bg-accent-hover disabled:opacity-60">Testset uitvoeren</button>
+        </div>
+        <p id="testStatus" class="mt-2 text-sm text-slate-600"></p>
+        <!-- Filled in by the script: the comparison across runs, then each run (newest first) -->
+        <div id="comparison"></div>
+        <div id="testResults"></div>
+      </details>
+
+      <div class="rounded-lg border-l-4 border-accent bg-tint px-4 py-3 text-sm text-marine">
+        <p class="font-semibold">Onze conclusie</p>
+        <p class="mt-1">Modelkeuze en kosten: nog in te vullen.</p>
+      </div>
+
+      <details class="card">
+        <summary class="cursor-pointer text-[1.0625rem] font-semibold text-marine">Wat echt is en wat gesimuleerd</summary>
+        <div class="why why-erik why-regel"><p>Waarom dit hier staat: u weet wat echt werkt en wat nog niet.</p></div>
+        <div class="mt-2 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          <div><p class="text-sm font-semibold text-emerald-800">Echt</p><ul class="mt-1 list-disc space-y-0.5 pl-5 text-sm"><li>Elke run is een live aanroep naar Claude (Haiku of Sonnet).</li><li>Vast schema met velden.</li><li>Testset van tien mails met antwoordsleutel.</li><li>Tweede model (OpenAI) als onafhankelijke beoordelaar.</li><li>Gemeten kosten en reactietijd per aanroep.</li></ul></div>
+          <div><p class="text-sm font-semibold text-amber-800">Gesimuleerd of nog niet gebouwd</p><ul class="mt-1 list-disc space-y-0.5 pl-5 text-sm"><li>De mails zijn verzonnen, geen echte klantdata.</li><li>Geen koppeling met mailbox of planningstool.</li><li>Foto's worden nog niet uitgelezen (alleen tekst).</li><li>De feedbackknop slaat niets op.</li><li>De uploadlink is een voorbeeld.</li><li>Het filter voor bankgegevens volgt vóór productie.</li></ul></div>
+        </div>
+
+      </details>
+    </section>
+
+  <footer class="mx-auto max-w-[1000px] px-4 pb-8 pt-2 text-center text-xs text-slate-600">OptiAI Strategy | Product-to-Value Business Case · © 2026 OptiAI Strategy. Alle rechten voorbehouden. Raamwerken van derden blijven toegeschreven aan hun eigenaren. · <a href="build.html" class="underline underline-offset-2 hover:text-marine">Zo is dit gebouwd</a></footer>
+
+  <!-- Glossary: one small popover for the ⓘ buttons, and one dialog with all terms -->
+  <div id="termPop" role="tooltip" class="hidden fixed z-50 w-72 max-w-[calc(100vw-2rem)] rounded border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-lg"></div>
+  <dialog id="glossary" class="w-[36rem] max-w-[calc(100vw-2rem)] rounded-xl p-0 backdrop:bg-slate-900/40">
+    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+      <h2 class="text-lg font-semibold text-marine">Begrippenlijst</h2>
+      <button type="button" id="closeGlossary" class="px-2 text-slate-500 hover:text-slate-800" aria-label="Begrippenlijst sluiten">✕</button>
+    </div>
+    <dl id="glossaryList" class="max-h-[70vh] overflow-y-auto px-4 py-3 space-y-3 text-sm"></dl>
+  </dialog>
+
+  <script>
+    // Glossary: one sentence per term, in plain language for a non-technical client.
+    // On Monday, add terms for the case here.
+    const GLOSSARY = {
+      "Antwoordsleutel": "De juiste antwoorden die we vooraf per testcasus hebben vastgelegd.",
+      "Overeenkomst met antwoordsleutel": "Hoeveel velden het model precies goed had, gecontroleerd door code.",
+      "Beoordelaar": "Een tweede AI-model, van een andere aanbieder, dat beoordeelt hoe helder de controlereden is.",
+      "Controlereden": "De uitleg van het model in één zin: wat ontbreekt, of waarom een mens moet controleren.",
+      "Testset": "Fictieve oefencasussen waarmee we het prototype elke keer op dezelfde manier meten.",
+      "Tokens": "De kleine stukjes tekst die een model leest en schrijft; de kosten worden per token berekend.",
+      "Kosten per aanroep": "Wat één verzoek aan het model kost, op basis van het aantal tokens.",
+      "Reactietijd": "Hoe lang het model nodig heeft om één verzoek te beantwoorden.",
+      "Drempel": "Het minimale aandeel velden dat met de antwoordsleutel moet overeenkomen (95%), en berichttype moet in elke casus goed zijn, om voor de testset te slagen.",
+      "Haiku / Sonnet": "Twee Claude-modellen; Haiku is klein, snel en goedkoop, Sonnet is sterker en duurder.",
+      "Schema": "De vaste lijst velden die we verwachten, zodat het model ook kan melden wat ontbreekt.",
+      "Berichttype": "De eerste controle: wat voor bericht is dit (storing, statusvraag, factuur-ISDE, offerte of overig)? Alleen een storing wordt verder uitgelezen.",
+      "Controle nodig": "Het model geeft aan dat een mens moet controleren voordat er iets wordt verwerkt.",
+      "Menselijke controle": "Een mens keurt de uitkomst van de AI goed of corrigeert die, voordat die wordt gebruikt.",
+      "Waardematrix": "Een raster dat laat zien waar een AI-toepassing waarde oplevert, per gebied en naar het moment waarop die waarde zichtbaar wordt.",
+      "Tijdshorizon": "Hoe lang het duurt voordat een soort waarde zichtbaar wordt.",
+      "Directe impact": "Waarde die binnen ongeveer zes maanden zichtbaar is, en die een pilot kan aantonen.",
+      "Uitgestelde impact": "Waarde die in 6 tot 24 maanden opbouwt, terwijl mensen en processen zich aanpassen.",
+      "Indirecte impact": "Waarde die via een neveneffect ontstaat, bijvoorbeeld tevredener klanten doordat antwoorden sneller komen.",
+      "Toekomstige impact": "Strategische of technologische waarde die eerst vaak onzichtbaar is, zoals nieuwe diensten of een herbruikbaar platform.",
+      "ROI": "Return on investment: het financiële rendement, zoals lagere kosten of hogere omzet.",
+      "ROE": "Return on employees: de waarde voor medewerkers, zoals minder repeterend werk en beter behoud.",
+      "ROF": "Return on the future: waarde die de organisatie voorbereidt op wat komt, zoals data, vaardigheden en platforms.",
+      "Gartner-waardedimensies": "De drie manieren waarop AI volgens Gartner waarde oplevert: rendement op investering, op medewerkers en op de toekomst.",
+      "Balanced Scorecard": "Een managementmodel dat prestaties vanuit vier invalshoeken bekijkt: financieel, klant, interne processen, en leren en groeien.",
+      "Pilot": "Een kleine proef van beperkte duur met echte gebruikers, om de waarde aan te tonen vóór een bredere invoering.",
+      "EU AI Act": "Europese wet voor het gebruik van AI; naar onze inschatting valt deze assistent niet onder de strengste regels, te toetsen met een jurist.",
+      "AVG": "De Europese privacywet: regels voor het omgaan met persoonsgegevens zoals namen en adressen.",
+      "DPIA": "Een beoordeling vooraf van de privacyrisico's van een nieuwe werkwijze; of die nodig is, toetsen we met een privacyfunctionaris of jurist.",
+      "Ondernemingsraad (OR)": "Het overlegorgaan van de medewerkers, dat bij maatregelen zoals meten per medewerker kan moeten instemmen.",
+      "AI-geletterdheid": "Genoeg kennis om verstandig met AI te werken: wat het kan, wat niet, en wanneer je zelf controleert.",
+      "ISO 27001": "Internationale norm voor informatiebeveiliging, dus voor hoe je gegevens beschermt.",
+      "ISO 9001": "Internationale norm voor kwaliteitsmanagement, onder meer voor beheerde documenten en vaste werkwijzen.",
+      "Feedbackloop": "Vaste cyclus waarin correcties van medewerkers worden bekeken en de assistent daarna wordt verbeterd.",
+      "Meeschrijven": "Testfase waarin de assistent een concept maakt zonder dat er iets naar buiten gaat, zodat de medewerker kan vergelijken.",
+      "Uploadlink": "Een link in de mail waarmee de klant zelf een foto van het typeplaatje kan toevoegen.",
+      "Go/no-go": "Het beslismoment waarop we op basis van de cijfers kiezen: uitrollen, bijsturen of stoppen.",
+    };
+
+    // The ⓘ button next to a term. Tapping it opens the popover; tapping again closes it.
+    const termPop = document.getElementById('termPop');
+    let openTerm = null;
+    function termIcon(term) {
+      if (!GLOSSARY[term]) return document.createTextNode('');
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'term-btn ml-1 px-0.5 align-baseline font-normal text-marine hover:opacity-70';
+      b.textContent = 'ⓘ';
+      b.setAttribute('aria-label', 'Wat is ' + term + '?');
+      b.onclick = e => { e.preventDefault(); openTerm === b ? closeTerm() : showTerm(b, term); };
+      return b;
+    }
+    function showTerm(button, term) { showPop(button, term, GLOSSARY[term]); }
+    // The same popover shows a source: its label and a short quote from the case.
+    function showPop(button, heading, body) {
+      const title = document.createElement('p');
+      title.className = 'font-medium text-marine';
+      title.textContent = heading;
+      const text = document.createElement('p');
+      text.className = 'mt-1';
+      text.textContent = body;
+      termPop.replaceChildren(title, text);
+      termPop.classList.remove('hidden');
+      openTerm = button;
+      placeTerm();
+    }
+    // Place it under the ⓘ, kept inside the screen with a 16px edge (above it if there is no room below).
+    function placeTerm() {
+      if (!openTerm) return;
+      const r = openTerm.getBoundingClientRect(), w = termPop.offsetWidth, h = termPop.offsetHeight;
+      termPop.style.left = Math.max(16, Math.min(r.left - 8, innerWidth - w - 16)) + 'px';
+      termPop.style.top = (r.bottom + 6 + h > innerHeight - 8 ? Math.max(8, r.top - h - 6) : r.bottom + 6) + 'px';
+    }
+    function closeTerm() { termPop.classList.add('hidden'); openTerm = null; }
+    // Tapping anywhere else or Esc closes it; while scrolling it stays next to its ⓘ.
+    document.addEventListener('click', e => { if (openTerm && !e.target.closest('.term-btn') && !termPop.contains(e.target)) closeTerm(); });
+    addEventListener('scroll', placeTerm, true);
+    addEventListener('resize', placeTerm);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTerm(); });
+
+    // Add an ⓘ to every element marked with data-term in the page.
+    document.querySelectorAll('[data-term]').forEach(s => s.append(termIcon(s.dataset.term)));
+
+    // Find a glossary term by its text, ignoring capitals (e.g. the field label "document type").
+    // Field name → glossary term, for fields whose name differs from the Dutch term. On Monday, add the case fields here.
+    const FIELD_TERMS = {};
+    const glossaryTerm = text => FIELD_TERMS[String(text).replaceAll(' ', '_')]
+      || Object.keys(GLOSSARY).find(k => k.toLowerCase() === String(text).toLowerCase());
+
+    // The "Glossary" link: all terms in one list, alphabetically.
+    const glossary = document.getElementById('glossary');
+    document.getElementById('openGlossary').onclick = () => {
+      const list = document.getElementById('glossaryList');
+      list.replaceChildren();
+      for (const term of Object.keys(GLOSSARY).sort((a, b) => a.localeCompare(b))) {
+        const dt = document.createElement('dt');
+        dt.className = 'font-medium text-marine';
+        dt.textContent = term;
+        const dd = document.createElement('dd');
+        dd.className = 'text-slate-600';
+        dd.textContent = GLOSSARY[term];
+        list.append(dt, dd);
+      }
+      closeTerm();
+      glossary.showModal();
+    };
+    document.getElementById('closeGlossary').onclick = () => glossary.close();
+    glossary.addEventListener('click', e => { if (e.target === glossary) glossary.close(); }); // tap outside closes
+
+    // Models and prices live on the server in api/_prompts.js; the server returns cost and response time per call.
+
+    // Pass rule (threshold): the share of fields that must match the answer key, over all cases in one run.
+    // A run passes only if at least 95% of all fields are correct (same as the spec on tab 3)
+    // AND berichttype is correct in every case (hard requirement).
+    const PASS_THRESHOLD = 0.95;
+    const passRuleText = `minstens ${Math.round(PASS_THRESHOLD * 100)}% van de velden goed én berichttype in elke casus goed`;
+    function runPassed(run) {
+      if (run.rows.some(r => r.error)) return false;
+      if (run.rows.some(r => r.wrong.some(w => w.field === 'berichttype'))) return false;
+      const total = run.rows.reduce((s, r) => s + r.fields.length, 0);
+      const ok = run.rows.reduce((s, r) => s + r.fields.length - r.wrong.length, 0);
+      return total > 0 && ok / total >= PASS_THRESHOLD;
+    }
+
+    // Tabs: show the chosen section and hide the others.
+    const tabs = document.querySelectorAll('[data-tab]');
+    const panels = document.querySelectorAll('[data-panel]');
+    function showTab(name) {
+      tabs.forEach(t => t.setAttribute('aria-selected', t.dataset.tab === name));
+      panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
+    }
+    // The open tab is kept in the address (e.g. index.html#oplossing), so a link can open a specific tab.
+    tabs.forEach(t => t.onclick = () => { showTab(t.dataset.tab); history.replaceState(null, '', '#' + t.dataset.tab); });
+    const tabFromUrl = () => { const h = location.hash.slice(1); return [...panels].some(p => p.dataset.panel === h) ? h : 'prototype'; };
+    addEventListener('hashchange', () => showTab(tabFromUrl()));
+    showTab(tabFromUrl());
+
+    // Advice boxes: the "Toelichting" switch shows or hides all of them.
+    const showWhy = document.getElementById('showWhy');
+    function updateWhy() { document.body.classList.toggle('no-why', !showWhy.checked); }
+    showWhy.onchange = updateWhy;
+    updateWhy();
+
+    // Links that open another tab, e.g. "Wat productie nodig heeft".
+    document.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => { showTab(b.dataset.goto); scrollTo(0, 0); });
+
+    // Demo: send the input to /api/run, show the fields as a form, and let a person approve or correct.
+    const $ = id => document.getElementById(id);
+    const runButton = $('run'), status = $('status'), result = $('result');
+    let fieldNames = [], original = {}, inputs = {};
+
+    // Model choices: the page asks the server which models it may offer (they live in api/_prompts.js).
+    async function loadModels() {
+      let list = [], def = '';
+      try {
+        const d = await (await fetch('/api/run')).json();
+        list = d.extract_models || [];
+        def = d.default_model;
+      } catch (e) { /* local preview: fall back to the server default */ }
+      for (const sel of document.querySelectorAll('select[data-models]')) {
+        sel.replaceChildren();
+        if (!list.length) sel.append(new Option('Standaard', ''));
+        for (const m of list) sel.append(new Option(m.label, m.id, m.id === def, m.id === def));
+      }
+    }
+    loadModels();
+
+    // Errors in red, so they don't look like grey placeholder text.
+    function showError(elm, text) {
+      elm.className = 'mt-2 text-sm text-red-700';
+      elm.textContent = text;
+    }
+
+    runButton.onclick = async () => {
+      result.classList.add('hidden');
+      $('adviesBlok').classList.add('hidden');
+      resetFeedback();
+      status.className = 'ph';
+      status.textContent = 'Bezig...';
+      runButton.disabled = true;
+      try {
+        const r = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          // Only the mode, the input and the model; the instructions live on the server in api/_prompts.js.
+          body: JSON.stringify({ mode: 'extract', input: $('input').value, model: $('demoModel').value })
+        });
+        const data = await r.json();
+        if (!r.ok || data.error) showError(status, 'Fout: ' + (data.error || 'onbekend'));
+        else showResult(data);
+      } catch (e) {
+        showError(status, 'Geen antwoord van /api/run. Dit werkt alleen via de Vercel-link, niet in een lokale voorvertoning.');
+      }
+      runButton.disabled = false;
+    };
+
+    // Example buttons: fill the input with a test mail from tests.json (case 2 = incomplete, case 1 = complete).
+    document.querySelectorAll('[data-voorbeeld]').forEach(b => b.onclick = async () => {
+      try {
+        const cases = (await (await fetch('tests.json')).json()).cases;
+        $('input').value = cases[Number(b.dataset.voorbeeld)].input;
+      } catch (e) { showError(status, 'Kon de voorbeeldmail niet laden.'); }
+    });
+
+    const META = ['ontbreekt', 'controle_nodig', 'reden', 'advies_medewerker', 'concept_uitvraag', 'concept_werkorder'];
+    // Colour per advice (an action): amber = opvragen, green = werkorder, red = bellen, grey = doorzetten, blue = nakijken.
+    const ADVIES_KLEUR = {
+      'Gegevens opvragen bij klant': 'border-amber-300 bg-amber-50 text-amber-900',
+      'Werkorder aanmaken': 'border-emerald-200 bg-emerald-50 text-emerald-900',
+      'Direct bellen met klant': 'border-red-300 bg-red-50 text-red-900',
+      'Doorzetten naar collega': 'border-slate-300 bg-slate-100 text-slate-800',
+      'Eerst nakijken': 'border-sky-300 bg-sky-50 text-sky-900'
+    };
+    let concepts = {};
+
+    function showResult(data) {
+      const out = data.output || {};
+      fieldNames = data.fields || Object.keys(out).filter(k => !META.includes(k));
+      const missing = Array.isArray(out.ontbreekt) ? out.ontbreekt : [];
+      original = {}; inputs = {};
+      $('fields').replaceChildren();
+
+      // One editable row per field; fields needed for a complete report that are missing are amber.
+      for (const name of fieldNames) {
+        const value = out[name] ?? null;
+        const isMissing = missing.includes(name);
+        original[name] = value === null ? '' : String(value).trim();
+        const row = document.createElement('label');
+        row.className = 'block' + (name === 'omschrijving' ? ' sm:col-span-2' : '');
+        const label = document.createElement('span');
+        label.className = 'text-sm ' + (isMissing ? 'font-medium text-amber-800' : 'text-slate-600');
+        label.textContent = name.replaceAll('_', ' ') + (isMissing ? ' (ontbreekt)' : '');
+        const term = glossaryTerm(name.replaceAll('_', ' '));
+        if (term) label.append(termIcon(term));
+        const input = document.createElement('input');
+        input.value = original[name];
+        input.className = 'mt-0.5 w-full p-1.5 text-sm rounded border focus:outline-none focus:border-accent ' +
+          (isMissing ? 'border-amber-300 bg-amber-50' : 'border-slate-300');
+        if (value === null) input.placeholder = 'Niet gevonden in de tekst';
+        input.oninput = () => { ['vraag', 'werkorder'].forEach(k => $(k + 'Bevestiging').classList.add('hidden')); };
+        inputs[name] = input;
+        row.append(label, input);
+        $('fields').append(row);
+      }
+
+      // Badge: green "Klaar voor werkorder" only for a complete storing; otherwise amber "Controle nodig".
+      const ready = out.berichttype === 'storing' && out.controle_nodig !== true && missing.length === 0;
+      const badge = $('badge');
+      badge.className = 'mt-2 rounded border px-3 py-2 text-sm ' +
+        (ready ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-amber-300 bg-amber-50 text-amber-900');
+      const title = document.createElement('strong');
+      title.textContent = ready ? 'Klaar voor werkorder' : 'Controle nodig';
+      badge.replaceChildren(title, ready ? '' : termIcon('Controle nodig'), out.reden ? ': ' + out.reden : '');
+
+      // What is missing for a complete report
+      const ont = $('ontbreekt');
+      ont.className = 'mt-2 text-sm ' + (missing.length ? 'text-amber-900' : 'text-emerald-800');
+      ont.textContent = missing.length
+        ? 'Ontbreekt voor een complete melding: ' + missing.map(m => m.replaceAll('_', ' ')).join(', ')
+        : (out.berichttype === 'storing' ? 'Niets: de melding is compleet.' : 'Geen storingsmelding: er wordt niets uitgevraagd.');
+
+      // The two concepts a person approves
+      setConcept('vraag', out.concept_uitvraag);
+      setConcept('werkorder', out.concept_werkorder);
+      showAdvies(out);
+      resetFeedback();
+      $('feedbackBlok').classList.remove('hidden');
+
+      $('raw').textContent = JSON.stringify(data, null, 2);
+      const u = data.usage;
+      $('tokens').textContent = u
+        ? `Model: ${data.model} · Tokens: ${u.total_tokens} (${u.prompt_tokens} in, ${u.completion_tokens} uit) · ${data.ms} ms · ${dollars(data.cost_usd)}`
+        : '';
+      status.classList.add('hidden');
+      result.classList.remove('hidden');
+    }
+
+    // Read the advice from whatever shape the model returned: an object { advies, waarom },
+    // a plain text ("Gegevens opvragen bij klant: adres ontbreekt"), or flat fields "advies" and "waarom" at the top level.
+    // Returns { advies, waarom }, or null if the model gave nothing.
+    const ADVIEZEN = ['Gegevens opvragen bij klant', 'Werkorder aanmaken', 'Direct bellen met klant', 'Doorzetten naar collega', 'Eerst nakijken'];
+    function leesAdvies(out) {
+      let raw = out.advies_medewerker;
+      if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+        if (typeof raw.advies === 'string' && raw.advies.trim()) return { advies: canonAdvies(raw.advies), waarom: String(raw.waarom ?? '').trim() };
+        raw = null;
+      }
+      if (typeof raw === 'string' && raw.trim()) {
+        const t = raw.trim(), low = t.toLowerCase();
+        const hit = ADVIEZEN.find(a => low.includes(a.toLowerCase()));
+        if (!hit) return { advies: t, waarom: '' };
+        const rest = t.replace(new RegExp(hit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '').replace(/^[\s:;,.\-–—]+/, '').trim();
+        return { advies: hit, waarom: rest };
+      }
+      if (typeof out.advies === 'string' && out.advies.trim()) return { advies: canonAdvies(out.advies), waarom: String(out.waarom ?? '').trim() };
+      return null;
+    }
+    // "eerst nakijken" or "Eerst nakijken." -> "Eerst nakijken"
+    function canonAdvies(text) {
+      const t = String(text).trim();
+      return ADVIEZEN.find(a => a.toLowerCase() === t.toLowerCase().replace(/[.!]+$/, '')) || t;
+    }
+
+    // Feedback block: pick one reason, then a thank-you appears. Front-end only; reset on every new run.
+    function resetFeedback() {
+      $('feedbackBlok').classList.add('hidden');
+      $('feedbackDank').classList.add('hidden');
+      document.querySelectorAll('.reden-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    }
+    document.querySelectorAll('.reden-btn').forEach(b => b.onclick = () => {
+      document.querySelectorAll('.reden-btn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      $('feedbackDank').classList.remove('hidden');
+    });
+
+    function showAdvies(out) {
+      const blok = $('adviesBlok');
+      const a = leesAdvies(out);
+      if (!a) {
+        // Never fail silently: say that the model gave no advice, so a missing block is not a mystery.
+        blok.className = 'rounded-lg border px-4 py-3 ' + ADVIES_KLEUR['Doorzetten naar collega'];
+        $('adviesTekst').textContent = 'geen advies ontvangen van het model';
+        $('adviesWaarom').textContent = 'Check de gegevens zelf (zie "Toon ruwe JSON").';
+        return;
+      }
+      blok.className = 'rounded-lg border px-4 py-3 ' + (ADVIES_KLEUR[a.advies] || ADVIES_KLEUR['Eerst nakijken']);
+      $('adviesTekst').textContent = a.advies;
+      $('adviesWaarom').textContent = a.waarom || '(geen toelichting)';
+    }
+
+    // A concept card: hidden when the model returned null; "Goedkeuren" while unchanged, "Aanpassen en goedkeuren" after an edit.
+    function setConcept(key, text) {
+      const has = typeof text === 'string' && text.trim() !== '';
+      concepts[key] = has ? text.trim() : '';
+      $(key + 'Blok').classList.toggle('hidden', !has);
+      $(key + 'Leeg').classList.toggle('hidden', has);
+      $(key + 'Tekst').value = concepts[key];
+      $(key + 'Bevestiging').classList.add('hidden');
+      if (key === 'vraag') $('vraagAudit').classList.add('hidden');
+      updateConcept(key);
+    }
+    function updateConcept(key) {
+      const changed = $(key + 'Tekst').value.trim() !== concepts[key];
+      $(key + 'Ok').disabled = changed;
+      $(key + 'Aangepast').disabled = !changed;
+    }
+    const changedFields = () => fieldNames.filter(n => inputs[n] && inputs[n].value.trim() !== original[n]);
+    function approveConcept(key) {
+      const changed = $(key + 'Tekst').value.trim() !== concepts[key];
+      const fieldsChanged = changedFields().length;
+      const box = $(key + 'Bevestiging');
+      const wat = key === 'vraag' ? 'De vraag gaat naar de klant' : 'De werkorder gaat naar de planner';
+      const first = document.createElement('p');
+      first.textContent = (changed ? 'Aangepast en goedgekeurd. ' : 'Goedgekeurd. ') + wat +
+        (fieldsChanged ? `, met ${fieldsChanged} ${fieldsChanged > 1 ? 'aangepaste velden' : 'aangepast veld'}` : '') +
+        '. In het prototype wordt niets verstuurd of opgeslagen.';
+      // Only shown, nothing is saved. "aangepast" = the concept text or a field was changed by the employee.
+      const audit = document.createElement('p');
+      audit.className = 'mt-1 text-xs text-emerald-800';
+      const nu = new Date().toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'medium' });
+      const aangepast = changed || fieldsChanged > 0 ? 'ja' : 'nee';
+      if (key === 'vraag') {
+        box.replaceChildren(first);
+        const v = $('vraagAudit');
+        v.textContent = `✓ Auditspoor vastgelegd: AI-voorstel, goedgekeurd door medewerker [demo], ${nu}, aangepast: ${aangepast}`;
+        v.classList.remove('hidden');
+      } else {
+        audit.textContent = `Vastgelegd voor audit: AI-voorstel, goedgekeurd door medewerker [demo], ${nu}, aangepast: ${aangepast}.`;
+        box.replaceChildren(first, audit);
+      }
+      box.classList.remove('hidden');
+    }
+    ['vraag', 'werkorder'].forEach(k => {
+      $(k + 'Tekst').oninput = () => { updateConcept(k); $(k + 'Bevestiging').classList.add('hidden'); if (k === 'vraag') $('vraagAudit').classList.add('hidden'); };
+      $(k + 'Ok').onclick = () => approveConcept(k);
+      $(k + 'Aangepast').onclick = () => approveConcept(k);
+    });
+
+    // ---------- Test set (FDE tab) ----------
+
+    // Small helper to build page elements safely (text only, never HTML).
+    function el(tag, className, text) {
+      const e = document.createElement(tag);
+      if (className) e.className = className;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+
+    // Phones: give every cell its column name, shown above the value when the table is stacked.
+    function labelCells(table, labels) {
+      for (const tr of table.querySelectorAll('tr:not(.stack-head)')) {
+        [...tr.children].forEach((cell, i) => { if (i > 0 && cell.colSpan === 1 && labels[i]) cell.dataset.label = labels[i]; });
+      }
+    }
+
+    // A table header cell, with an ⓘ when the header is a glossary term.
+    function th(text, term) {
+      const cell = el('th', 'p-2 font-medium align-bottom', text);
+      if (term) cell.append(termIcon(term));
+      return cell;
+    }
+
+    async function callApi(mode, input, model) {
+      const r = await fetch('/api/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, input, model })
+      });
+      const data = await r.json();
+      if (!r.ok || data.error) throw new Error(data.error || 'onbekende fout');
+      return data;
+    }
+
+    // Turn "€3,512.40", "€2.180,00" or "4250" into a number.
+    function toNumber(v) {
+      if (typeof v === 'number') return v;
+      let s = String(v).replace(/[^\d.,-]/g, '');
+      const c = s.lastIndexOf(','), d = s.lastIndexOf('.');
+      if (c > -1 && d > -1) {
+        const dec = c > d ? ',' : '.';
+        s = s.split(dec === ',' ? '.' : ',').join('').replace(dec, '.');
+      } else if (c > -1 || d > -1) {
+        const parts = s.split(c > -1 ? ',' : '.');
+        s = parts.length === 2 && parts[1].length !== 3 ? parts.join('.') : parts.join('');
+      }
+      return parseFloat(s);
+    }
+
+    // Turn "3 November 2026", "28 oktober 2026", "03-11-2026" or "2026-11-03" into "2026-11-03".
+    const MONTHS = { jan: 1, feb: 2, mar: 3, maa: 3, apr: 4, may: 5, mei: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, okt: 10, nov: 11, dec: 12 };
+    function toDate(v) {
+      const s = String(v).trim().toLowerCase();
+      const pad = n => String(n).padStart(2, '0');
+      let m;
+      if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) return `${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+      if ((m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/))) return `${m[3]}-${pad(m[2])}-${pad(m[1])}`;
+      if ((m = s.match(/^(\d{1,2})\s+([a-z]+)\.?\s+(\d{4})$/)) && MONTHS[m[2].slice(0, 3)]) return `${m[3]}-${pad(MONTHS[m[2].slice(0, 3)])}-${pad(m[1])}`;
+      if ((m = s.match(/^([a-z]+)\.?\s+(\d{1,2}),?\s+(\d{4})$/)) && MONTHS[m[1].slice(0, 3)]) return `${m[3]}-${pad(MONTHS[m[1].slice(0, 3)])}-${pad(m[2])}`;
+      return s;
+    }
+
+    const toText = v => String(v).toLowerCase().replace(/\s+/g, ' ').trim().replace(/\.$/, '');
+
+    // The comparison in code, after normalising capitals and spaces. The type of the expected value decides how:
+    // null = must be empty; list = same items in any order; {bevat: "x"} = text must contain x;
+    // true/false = same yes/no; number = compare as number; yyyy-mm-dd = compare as date; otherwise as text.
+    function sameValue(got, expected) {
+      if (Array.isArray(expected)) {
+        const norm = list => (Array.isArray(list) ? list : []).map(toText).sort().join('|');
+        return norm(got) === norm(expected);
+      }
+      if (typeof expected === 'boolean') return got === expected || toText(got) === String(expected);
+      const empty = got === null || got === undefined || String(got).trim() === '';
+      if (expected === null) return empty;
+      if (typeof expected === 'object') return !empty && toText(got).includes(toText(expected.bevat));
+      if (empty) return false;
+      if (typeof expected === 'number') return Math.abs(toNumber(got) - expected) < 0.005;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(expected)) return toDate(got) === expected;
+      return toText(got) === toText(expected);
+    }
+
+    // Show a value in the failure list: lists as "a, b", {bevat} as 'bevat "x"', empty as null.
+    const fmt = v => v === null || v === undefined ? 'null' : Array.isArray(v) ? '[' + v.join(', ') + ']'
+      : typeof v === 'object' ? `bevat "${v.bevat}"` : String(v);
+
+    const dollars = n => (typeof n === 'number' ? '$' + n.toFixed(5) : 'kosten onbekend');
+    const average = list => {
+      const nums = list.filter(x => typeof x === 'number');
+      return nums.length ? nums.reduce((s, x) => s + x, 0) / nums.length : null;
+    };
+
+    // Every test run is kept here until the page is reloaded, so models can be compared.
+    const runs = [];
+
+    $('runTests').onclick = async () => {
+      const button = $('runTests'), statusLine = $('testStatus');
+      const model = $('testModel').value;
+      button.disabled = true;
+      statusLine.className = 'mt-2 text-sm text-slate-600';
+      const rows = [];
+      try {
+        const tests = (await (await fetch('tests.json')).json()).cases;
+        for (let i = 0; i < tests.length; i++) {
+          const t = tests[i];
+          statusLine.textContent = `Casus ${i + 1} van ${tests.length} wordt uitgevoerd...`;
+          const row = { name: t.name, fields: Object.keys(t.expected), wrong: [] };
+          try {
+            const ex = await callApi('extract', t.input, model);
+            const out = ex.output || {};
+            row.model = ex.model;
+            row.extractUsage = ex.usage;
+            row.extractCost = ex.cost_usd;
+            row.ms = ex.ms;
+            for (const f of row.fields) {
+              // The advice may come as an object, text or flat fields (see leesAdvies); only "advies" is compared in code.
+              const got = f === 'advies_medewerker' ? leesAdvies(out)?.advies : out[f];
+              if (!sameValue(got, t.expected[f])) row.wrong.push({ field: f, expected: t.expected[f], got: got ?? null });
+            }
+            const judge = await callApi('judge', JSON.stringify({
+              uitvoer: out,
+              verwachte_reden: t.goede_reden
+            }));
+            row.judgeUsage = judge.usage;
+            row.judgeCost = judge.cost_usd;
+            row.score = judge.output?.score;
+            row.reason = judge.output?.reason || '';
+          } catch (e) {
+            row.error = e.message;
+          }
+          rows.push(row);
+        }
+        statusLine.textContent = `Klaar: ${rows.length} casussen.`;
+
+        // Keep this run, show it on top, and update the comparison.
+        const run = { number: runs.length + 1, model: rows.find(r => r.model)?.model || model || 'standaard', rows };
+        runs.push(run);
+        const box = el('div', 'mt-6 pt-3 border-t border-slate-200');
+        const title = el('p', 'text-sm font-medium text-slate-700', `Ronde ${run.number}: ${run.model} · `);
+        title.append(runPassed(run)
+          ? el('span', 'text-emerald-700', 'Geslaagd ✓')
+          : el('span', 'text-red-700', 'Niet geslaagd ✗'));
+        box.append(title);
+        showTestResults(rows, box);
+        $('testResults').prepend(box);
+        showComparison();
+      } catch (e) {
+        showError(statusLine, 'Kon de testset niet uitvoeren: ' + e.message);
+      }
+      button.disabled = false;
+    };
+
+    // A table cell with a key number (marine, orange underline) plus optional detail text.
+    function keyCell(number, detail) {
+      const cell = el('td', 'p-2');
+      cell.append(el('span', 'keynum', number), detail);
+      return cell;
+    }
+
+    // Comparison block: one row per model, over all runs on this page.
+    function showComparison() {
+      const wrap = el('div', 'mt-3 overflow-x-auto');
+      const table = el('table', 'stack-sm w-full text-sm text-left border border-line');
+      const head = el('tr', 'stack-head bg-slate-50 text-slate-600');
+      const headers = [['Model'], ['Rondes'], ['Slaagt voor testset', 'Drempel'], ['Gemiddelde overeenkomst met antwoordsleutel', 'Overeenkomst met antwoordsleutel'], ['Gemiddelde score beoordelaar', 'Beoordelaar'], ['Kosten per aanroep', 'Kosten per aanroep'], ['Gemiddelde reactietijd', 'Reactietijd']];
+      for (const [h, term] of headers) head.append(th(h, term));
+      table.append(head);
+      for (const model of [...new Set(runs.map(r => r.model))]) {
+        const modelRuns = runs.filter(r => r.model === model);
+        const done = modelRuns.flatMap(r => r.rows).filter(r => !r.error);
+        const total = done.reduce((s, r) => s + r.fields.length, 0);
+        const ok = done.reduce((s, r) => s + r.fields.length - r.wrong.length, 0);
+        const score = average(done.map(r => Number(r.score)).filter(n => !isNaN(n)));
+        const ms = average(done.map(r => r.ms));
+        const tr = el('tr', 'border-t border-slate-200');
+        tr.append(
+          el('td', 'p-2 whitespace-nowrap', model),
+          el('td', 'p-2', String(modelRuns.length)),
+          passCell(modelRuns),
+          keyCell(total ? `${Math.round((ok / total) * 100)}%` : '–', total ? ` (${ok} van ${total})` : ''),
+          el('td', 'p-2', score !== null ? `${score.toFixed(1)} / 5` : '–'),
+          keyCell(dollars(average(done.map(r => r.extractCost))), ''),
+          el('td', 'p-2 whitespace-nowrap', ms !== null ? `${Math.round(ms)} ms` : '–')
+        );
+        table.append(tr);
+      }
+      labelCells(table, headers.map(h => h[0]));
+      wrap.append(table);
+      $('comparison').replaceChildren(
+        el('p', 'mt-4 text-sm font-medium text-slate-700', 'Modelvergelijking (alle rondes op deze pagina)'),
+        wrap,
+        el('p', 'mt-1 text-xs text-slate-500', 'Kosten per aanroep en reactietijd gelden voor de aanroep van de use case, zonder de beoordelaar.'),
+        passRuleLine(),
+        el('p', 'mt-2 text-sm text-slate-700', 'Kies het goedkoopste model dat slaagt voor de testset.')
+      );
+    }
+
+    // "Passes test set" cell: a model passes only if every one of its runs passed.
+    function passCell(modelRuns) {
+      const passed = modelRuns.filter(runPassed).length;
+      const all = passed === modelRuns.length;
+      const cell = el('td', 'p-2 whitespace-nowrap');
+      cell.append(el('span', all ? 'font-semibold text-emerald-700' : 'font-semibold text-red-700', all ? 'Ja ✓' : 'Nee ✗'),
+        ` (${passed} van ${modelRuns.length} ${modelRuns.length > 1 ? 'rondes' : 'ronde'})`);
+      return cell;
+    }
+
+    function passRuleLine() {
+      const p = el('p', 'mt-1 text-xs text-slate-500', `Slaagregel: ${passRuleText}.`);
+      p.append(termIcon('Drempel'));
+      return p;
+    }
+
+    function showTestResults(rows, box) {
+      // Main table: one row per case.
+      const wrap = el('div', 'mt-3 overflow-x-auto');
+      const table = el('table', 'stack-sm w-full text-sm text-left border border-line');
+      const head = el('tr', 'stack-head bg-slate-50 text-slate-600');
+      const headers = [['Casus'], ['berichttype goed', 'Berichttype'], ['Overeenkomst met antwoordsleutel', 'Overeenkomst met antwoordsleutel'], ['Score beoordelaar', 'Beoordelaar'], ['Toelichting beoordelaar'], ['Tokens', 'Tokens']];
+      for (const [h, term] of headers) head.append(th(h, term));
+      table.append(head);
+      for (const r of rows) {
+        const tr = el('tr', 'border-t border-slate-200 align-top');
+        tr.append(el('td', 'p-2', r.name));
+        if (r.error) {
+          const td = el('td', 'p-2 text-red-700', 'Fout: ' + r.error);
+          td.colSpan = 5;
+          tr.append(td);
+        } else {
+          const docOk = !r.wrong.some(w => w.field === 'berichttype');
+          tr.append(el('td', 'p-2 ' + (docOk ? 'text-emerald-700' : 'text-red-700'), docOk ? '✓' : '✗'));
+          const okCount = r.fields.length - r.wrong.length;
+          tr.append(el('td', 'p-2 ' + (r.wrong.length ? 'text-red-700' : 'text-emerald-700'), `${okCount} van ${r.fields.length}`));
+          tr.append(el('td', 'p-2', r.score !== undefined ? `${r.score} / 5` : '–'));
+          tr.append(el('td', 'p-2 min-w-[14rem]', r.reason));
+          tr.append(el('td', 'p-2 whitespace-nowrap', `${r.extractUsage?.total_tokens ?? 0} + ${r.judgeUsage?.total_tokens ?? 0}`));
+        }
+        table.append(tr);
+      }
+      labelCells(table, headers.map(h => h[0]));
+      wrap.append(table);
+      const emptyNote = el('p', 'mt-1 text-xs text-slate-500', 'Een leeg veld telt als goed als de antwoordsleutel een leeg veld verwacht (bijvoorbeeld: bij een statusvraag blijven de storingsvelden leeg). Lijsten worden zonder volgorde vergeleken.');
+      emptyNote.append(termIcon('Antwoordsleutel'));
+      box.append(wrap,
+        emptyNote,
+        el('p', 'mt-1 text-xs text-slate-500', 'Tokens: uitleesaanroep + aanroep beoordelaar.'));
+
+      // Failures named per case.
+      const done = rows.filter(r => !r.error);
+      const failures = done.flatMap(r => r.wrong.map(w => `${r.name}: ${w.field} verwacht ${fmt(w.expected)}, kreeg ${fmt(w.got)}`));
+      box.append(el('p', 'mt-4 text-sm font-medium text-slate-700', 'Velden die fout waren'));
+      const list = el('ul', 'mt-1 text-sm space-y-0.5 ' + (failures.length ? 'text-red-700' : 'text-emerald-700'));
+      (failures.length ? failures : ['Geen.']).forEach(f => list.append(el('li', '', f)));
+      box.append(list);
+
+      if (!done.length) return;
+
+      // Accuracy per field across all cases.
+      box.append(el('p', 'mt-4 text-sm font-medium text-slate-700', 'Nauwkeurigheid per veld'));
+      const acc = el('table', 'mt-1 text-sm text-left border border-slate-200');
+      for (const f of [...new Set(done.flatMap(r => r.fields))]) {
+        const withF = done.filter(r => r.fields.includes(f));
+        const ok = withF.filter(r => !r.wrong.some(w => w.field === f)).length;
+        const tr = el('tr', 'border-t border-slate-200');
+        tr.append(el('td', 'px-2 py-1', f), el('td', 'px-2 py-1 ' + (ok === withF.length ? 'text-emerald-700' : 'text-red-700'), `${ok} van ${withF.length}`));
+        acc.append(tr);
+      }
+      box.append(acc);
+
+      // Cost and speed per call, as returned by the server.
+      const ms = average(done.map(r => r.ms));
+      const total = done.reduce((s, r) => s + (r.extractCost || 0) + (r.judgeCost || 0), 0);
+      box.append(el('p', 'mt-4 text-sm font-medium text-slate-700', 'Kosten en snelheid'));
+      const costs = el('ul', 'mt-1 text-sm space-y-0.5 text-slate-700');
+      costs.append(
+        el('li', '', `Model: ${done[0].model || 'onbekend'}`),
+        el('li', '', `Per uitleesaanroep: ${dollars(average(done.map(r => r.extractCost)))} (gemiddeld)`),
+        el('li', '', `Per aanroep beoordelaar: ${dollars(average(done.map(r => r.judgeCost)))} (gemiddeld)`),
+        el('li', '', `Deze testronde: ${dollars(total)}`),
+        el('li', '', `Reactietijd per uitleesaanroep: ${ms !== null ? Math.round(ms) + ' ms' : '–'} (gemiddeld)`)
+      );
+      box.append(costs, el('p', 'mt-1 text-xs text-slate-500',
+        'Prijzen van Anthropic gecontroleerd op claude.com/pricing, 9 nov 2026 (api/_prompts.js); de prijs van de beoordelaar (OpenAI) is nog te controleren op openai.com/api/pricing.'));
+    }
+  </script>
+</body>
+</html>

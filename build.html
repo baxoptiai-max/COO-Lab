@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Zo is dit gebouwd</title>
+  <style>
+    /* Same colours as index.html. */
+    :root {
+      --marine: #060026;
+      --orange: #fa6339;
+      --orange-hover: #dd4a20;
+      --tint: #e8f2ff;
+      --tint-border: #c9dcfb;
+      --bg: #f6f5f2;
+      --line: #e4e2dc;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: {
+      marine: 'var(--marine)', accent: 'var(--orange)', 'accent-hover': 'var(--orange-hover)',
+      tint: 'var(--tint)', line: 'var(--line)', page: 'var(--bg)'
+    } } } };
+  </script>
+  <style>
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 0.75rem; padding: 1rem 1.25rem; }
+    .card h2 { font-size: 1.0625rem; font-weight: 600; color: var(--marine); }
+    .card ul, .card ol { margin-top: 0.5rem; }
+    .card li { margin-top: 0.375rem; }
+    .card li b { font-weight: 600; color: var(--marine); }
+    /* Phones: wide tables marked .stack-sm become stacked blocks, one card per row with the column name above
+       each value, so nothing falls off the screen. Desktop is unchanged. */
+    @media (max-width: 639px) {
+      table.stack-sm, table.stack-sm tbody, table.stack-sm tr, table.stack-sm th, table.stack-sm td { display: block; width: 100%; }
+      table.stack-sm thead, table.stack-sm tr.stack-head { display: none; }
+      table.stack-sm { border: 0; min-width: 0; }
+      table.stack-sm tr { border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.5rem 0.75rem; margin-top: 0.5rem; }
+      table.stack-sm th, table.stack-sm td { padding: 0.25rem 0; }
+      table.stack-sm tr > :first-child { font-weight: 600; color: var(--marine); }
+      table.stack-sm td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; font-weight: 600; color: #475569; }
+    }
+    /* Diagram colours */
+    .d-box { fill: #fff; stroke: var(--marine); stroke-width: 1.5; }
+    .d-server { fill: var(--marine); }
+    .d-model { fill: var(--tint); stroke: var(--tint-border); stroke-width: 1.5; }
+    .d-title { font: 600 14px system-ui, sans-serif; fill: var(--marine); }
+    .d-text { font: 12px system-ui, sans-serif; fill: #475569; }
+    .d-light-title { font: 600 14px system-ui, sans-serif; fill: #fff; }
+    .d-light-text { font: 12px system-ui, sans-serif; fill: rgba(255,255,255,0.85); }
+    .d-arrow { stroke: var(--marine); stroke-width: 1.5; fill: none; }
+    .d-label { font: 11px system-ui, sans-serif; fill: #475569; }
+  </style>
+</head>
+<body class="bg-page text-slate-800 font-sans">
+
+  <header class="bg-marine text-white">
+    <div class="mx-auto max-w-[1000px] px-4 py-6">
+      <a href="index.html" class="text-sm text-white underline decoration-[var(--orange)] decoration-2 underline-offset-4 hover:text-white/80">← Terug naar de use case</a>
+      <h1 class="mt-3 text-2xl sm:text-3xl font-semibold">Zo is dit gebouwd</h1>
+      <p class="mt-2 text-base sm:text-lg text-white/85">De technische opzet achter dit prototype, in gewone taal.</p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-[1000px] px-4 py-5 space-y-4">
+
+    <div class="card">
+      <h2>1. Architectuur</h2>
+      <svg viewBox="0 0 360 300" role="img" aria-labelledby="diagramTitle" class="mt-3 mx-auto block w-full max-w-[520px]">
+        <title id="diagramTitle">De browser stuurt tekst naar één serverfunctie op Vercel, die Claude aanroept voor de use case en OpenAI als onafhankelijke beoordelaar. De sleutels staan alleen op de server.</title>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--marine)"/>
+          </marker>
+        </defs>
+
+        <!-- Browser -->
+        <rect class="d-box" x="80" y="8" width="200" height="52" rx="8"/>
+        <text class="d-title" x="180" y="30" text-anchor="middle">Browser</text>
+        <text class="d-text" x="180" y="48" text-anchor="middle">de pagina: demo en testset</text>
+
+        <!-- Browser to server -->
+        <line class="d-arrow" x1="180" y1="60" x2="180" y2="100" marker-end="url(#arrow)"/>
+        <text class="d-label" x="188" y="84">tekst, modus, model</text>
+
+        <!-- Server function -->
+        <rect class="d-server" x="30" y="102" width="300" height="86" rx="8"/>
+        <text class="d-light-title" x="180" y="126" text-anchor="middle">Serverfunctie op Vercel</text>
+        <text class="d-light-text" x="180" y="146" text-anchor="middle">🔑 sleutels staan alleen hier</text>
+        <text class="d-light-text" x="180" y="164" text-anchor="middle">vaste instructies · toegestane modellen</text>
+        <text class="d-light-text" x="180" y="180" text-anchor="middle">invoerlimiet 20.000 tekens</text>
+
+        <!-- Server to the two providers -->
+        <path class="d-arrow" d="M120,188 L95,232" marker-end="url(#arrow)"/>
+        <path class="d-arrow" d="M240,188 L265,232" marker-end="url(#arrow)"/>
+
+        <!-- Claude -->
+        <rect class="d-model" x="10" y="234" width="160" height="58" rx="8"/>
+        <text class="d-title" x="90" y="257" text-anchor="middle">Claude (Anthropic)</text>
+        <text class="d-text" x="90" y="277" text-anchor="middle">voert de use case uit</text>
+
+        <!-- OpenAI -->
+        <rect class="d-model" x="190" y="234" width="160" height="58" rx="8"/>
+        <text class="d-title" x="270" y="257" text-anchor="middle">OpenAI</text>
+        <text class="d-text" x="270" y="277" text-anchor="middle">onafhankelijke beoordelaar</text>
+      </svg>
+      <ul class="list-disc pl-5 text-sm">
+        <li>De pagina praat nooit rechtstreeks met een model. Ze stuurt de tekst naar één serverfunctie, die de vaste instructies toevoegt en het model aanroept.</li>
+        <li>De use case draait op Claude. Een andere aanbieder, OpenAI, beoordeelt de resultaten in de testset, zodat geen model zijn eigen werk nakijkt.</li>
+        <li>De API-sleutels staan alleen op de server, als omgevingsvariabelen in Vercel. Ze komen nooit in de browser.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>2. Zo komen wijzigingen online</h2>
+      <ol class="list-decimal pl-5 text-sm">
+        <li>De code staat in een <b>privé GitHub-repository</b>.</li>
+        <li>Bij elke push draait een <b>vertrouwelijkheidscontrole</b> (tripwire) die een privélijst met termen tegenhoudt. Publiceren gaat via een <b>controlestap</b>, waarin een agent (publish-judge) de wijziging toetst aan de projectregels.</li>
+        <li>Na de push <b>zet Vercel</b> de nieuwe versie automatisch online.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>3. Keuzes voor beveiliging</h2>
+      <ul class="list-disc pl-5 text-sm">
+        <li><b>Sleutels alleen op de server:</b> nooit in de code, in een chat of in de browser.</li>
+        <li><b>Instructies vast op de server:</b> de browser stuurt alleen de tekst, een modus en een model; hij kan niet veranderen wat het model te horen krijgt.</li>
+        <li><b>Alleen toegestane modellen:</b> elke andere modelnaam wordt geweigerd.</li>
+        <li><b>Invoerlimiet:</b> maximaal 20.000 tekens per verzoek, zodat de kosten van één aanroep begrensd zijn.</li>
+        <li><b>Vooraf betaald tegoed met bestedingslimieten</b> bij de aanbieders, zodat misbruik geen hoge rekening kan opleveren.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>4. Evaluatie</h2>
+      <ul class="list-disc pl-5 text-sm">
+        <li><b>Testset met antwoordsleutel:</b> fictieve casussen, met de juiste waarde voor elk veld vooraf vastgelegd.</li>
+        <li><b>Controle per veld in code:</b> getallen, datums en tekst worden opgeschoond en vergeleken, met elke keer dezelfde uitkomst.</li>
+        <li><b>Onafhankelijke beoordelaar:</b> een model van een andere aanbieder geeft de controlereden een score van 1 tot 5.</li>
+        <li><b>Modelvergelijking:</b> nauwkeurigheid, kosten per aanroep en reactietijd per model. Slaagregel: minstens 95% van de velden goed, over alle casussen, én berichttype in elke casus goed; kies het goedkoopste model dat slaagt.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>5. Hergebruik voor een nieuwe casus</h2>
+      <p class="mt-1 text-sm">Per casus veranderen alleen deze onderdelen:</p>
+      <ul class="list-disc pl-5 text-sm">
+        <li><b>Velden en prompts:</b> één bestand op de server.</li>
+        <li><b>Testcasussen:</b> nieuwe fictieve casussen en hun antwoordsleutel.</li>
+        <li><b>Demolabels:</b> wat het invoerveld vraagt.</li>
+        <li><b>Teksten per tabblad:</b> het verhaal voor de klant, de details voor de FDE, aannames en vragen, en nieuwe begrippen.</li>
+        <li><b>Modellen en prijzen,</b> als dat nodig is.</li>
+      </ul>
+      <p class="mt-2 text-sm text-slate-600">Al het andere blijft gelijk: de serverfunctie, de controles, de evaluatie en het ontwerp.</p>
+    </div>
+
+    <div class="card">
+      <h2>6. Ontwerpkeuzes</h2>
+      <div class="mt-3 overflow-x-auto">
+        <table class="stack-sm w-full text-sm text-left align-top border border-line">
+          <thead class="bg-slate-50 text-slate-600">
+            <tr>
+              <th class="p-2 font-medium min-w-[9rem]">Keuze</th>
+              <th class="p-2 font-medium min-w-[12rem]">Wat we testten</th>
+              <th class="p-2 font-medium min-w-[14rem]">Wat we zagen</th>
+              <th class="p-2 font-medium min-w-[14rem]">Wat we kozen</th>
+            </tr>
+          </thead>
+          <tbody class="align-top">
+            <tr class="border-t border-line">
+              <td class="p-2 font-medium text-marine">Vast schema met velddefinities</td>
+              <td data-label="Wat we testten" class="p-2">Een Nederlandse factuur met alleen "Totaal: €2.180,00", zonder "incl. btw".</td>
+              <td data-label="Wat we zagen" class="p-2">Haiku liet het totaal leeg, omdat de definitie "totaal inclusief btw" zei. De definitie was onduidelijk, niet het model.</td>
+              <td data-label="Wat we kozen" class="p-2">Eén vaste lijst velden, elk met een definitie van één regel, inclusief Nederlandse labels. Bedragen alleen als ze er staan; nooit berekend of geschat.</td>
+            </tr>
+            <tr class="border-t border-line">
+              <td class="p-2 font-medium text-marine">Controle op documentsoort vóór het uitlezen</td>
+              <td data-label="Wat we testten" class="p-2">Een e-mail met een vraag over een betaling, met een leverancier en "rond de 900 euro".</td>
+              <td data-label="Wat we zagen" class="p-2">De eerste ronde herkende het niet als e-mail: 6 van 9 velden goed, 3 fout. Nadat we factuur en e-mail hadden gedefinieerd, haalden beide Claude-modellen 9 van 9.</td>
+              <td data-label="Wat we kozen" class="p-2">Documentsoort is het eerste veld. Geen factuur: alle andere velden blijven leeg en het gaat naar een mens.</td>
+            </tr>
+            <tr class="border-t border-line">
+              <td class="p-2 font-medium text-marine">Controle in code plus onafhankelijke beoordelaar</td>
+              <td data-label="Wat we testten" class="p-2">Elk veld gecontroleerd in code; de controlereden beoordeeld door een model van een andere aanbieder.</td>
+              <td data-label="Wat we zagen" class="p-2">Bij diezelfde e-mail gaf de beoordelaar 5 van 5, terwijl 3 velden fout waren. Eén score alleen had de fouten verborgen.</td>
+              <td data-label="Wat we kozen" class="p-2">Allebei, apart getoond. De beoordelaar draait op OpenAI, zodat geen model werk van de eigen aanbieder nakijkt.</td>
+            </tr>
+            <tr class="border-t border-line">
+              <td class="p-2 font-medium text-marine">Modelkeuze: Haiku of Sonnet</td>
+              <td data-label="Wat we testten" class="p-2">Dezelfde testset (10 verzonnen storingsmails) op beide modellen.</td>
+              <td data-label="Wat we zagen" class="p-2">Haiku: alle velden goed in de laatste ronde (10 van 10 casussen, 100%). Modelkosten (inference): ~$ 0,25 per week met Haiku, ~$ 4 met Sonnet, bij 300 meldingen; minder dan € 5 per week. Sonnet scoort ook 100% en schrijft net iets betere conceptmails (beoordelaar 5,0 tegen 4,6), maar kost circa 16 keer zoveel per melding.</td>
+              <td data-label="Wat we kozen" class="p-2">Haiku als standaard, met Sonnet als tweede mening bij meldingen die controle nodig hebben: een medewerker keurt elke mail goed. Kanttekening: de prompt is aangescherpt op deze 10 testmails; vóór de pilot testen we op 50 nieuwe, geanonimiseerde echte meldingen.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-4 rounded-lg border-l-4 border-accent bg-tint px-4 py-3 text-sm text-marine">
+        <p class="font-semibold">Onze conclusie</p>
+        <p class="mt-1">Haiku als standaard: alle velden goed in de laatste ronde (10 van 10 casussen, 100%). Modelkosten (inference): ~$ 0,25 per week met Haiku, ~$ 4 met Sonnet, bij 300 meldingen; minder dan € 5 per week. Sonnet scoort ook 100% en schrijft net iets betere conceptmails (beoordelaar 5,0 tegen 4,6), maar kost circa 16 keer zoveel per melding. Omdat een medewerker elke mail goedkeurt, kiezen we Haiku, met Sonnet als tweede mening bij meldingen die controle nodig hebben. Kanttekening: de prompt is aangescherpt op deze 10 testmails; vóór de pilot testen we op 50 nieuwe, geanonimiseerde echte meldingen.</p>
+      </div>
+      <p class="mt-1 text-xs text-slate-500">Prijzen gecontroleerd op claude.com/pricing, 9 nov 2026: Haiku $ 0,10 / $ 0,50, Sonnet $ 2 / $ 10 per miljoen tokens in/uit; kosten per melding gemeten in de testset.</p>
+      <p class="mt-3 text-sm text-slate-600">Ontworpen en getest door Barbara van Asten; code geschreven met Claude Code.</p>
+    </div>
+
+    <div class="card">
+      <h2>7. Kwaliteitscontrole</h2>
+      <p class="mt-1 text-sm">Twee reviewrondes. Ronde 1 leverde tien bevindingen op; na verwerking beoordeelde de reviewer de herziene versie als 'aantoonbaar verbeterd'. Openstaande punten zijn als aanname of productievoorwaarde benoemd.</p>
+    </div>
+
+    <div class="card">
+      <h2>8. Gebouwd met</h2>
+      <ul class="mt-3 flex flex-wrap gap-2 text-sm">
+        <li class="!mt-0 rounded-full border border-line bg-tint px-3 py-1 text-marine">Claude Code</li>
+        <li class="!mt-0 rounded-full border border-line bg-tint px-3 py-1 text-marine">GitHub</li>
+        <li class="!mt-0 rounded-full border border-line bg-tint px-3 py-1 text-marine">Vercel</li>
+        <li class="!mt-0 rounded-full border border-line bg-tint px-3 py-1 text-marine">Anthropic API</li>
+        <li class="!mt-0 rounded-full border border-line bg-tint px-3 py-1 text-marine">OpenAI API</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer class="mx-auto max-w-[1000px] px-4 pb-8 pt-2 text-center text-xs text-slate-600">
+    OptiAI Strategy | Product-to-Value Business Case · © 2026 OptiAI Strategy. Alle rechten voorbehouden. Raamwerken van derden blijven toegeschreven aan hun eigenaren. · <a href="index.html" class="underline underline-offset-2 hover:text-marine">Terug naar de use case</a>
+  </footer>
+</body>
+</html>

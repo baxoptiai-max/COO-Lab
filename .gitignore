@@ -1,0 +1,7 @@
+.DS_Store
+.vercel
+_private/
+.env*
+node_modules/
+CLAUDE.md
+.claude/
