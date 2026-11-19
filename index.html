@@ -1,365 +1,575 @@
-<!doctype html>
-<html lang="nl">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>COO-Lab</title>
-  <style>
-    /* Colours: palette. */
-    :root {
-      --marine: #060026;       
-      --orange: #fa6339;       
-      --orange-hover: #dd4a20; 
-      --tint: #e8f2ff;         
-      --tint-border: #c9dcfb;
-      --bg: #f6f5f2;            /* very light warm grey page background */
-      --line: #e4e2dc;          /* subtle card border */
-    }
-  </style>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    // Let Tailwind classes use the colour variables above (e.g. bg-marine, bg-accent, border-line).
-    tailwind.config = { theme: { extend: { colors: {
-      marine: 'var(--marine)', accent: 'var(--orange)', 'accent-hover': 'var(--orange-hover)',
-      tint: 'var(--tint)', line: 'var(--line)', page: 'var(--bg)'
-    } } } };
-  </script>
-  <style>
-    /* White cards with a subtle border; headings in marine; grey placeholder text (readable: 4.7:1 on white). */
-    .card { background: #fff; border: 1px solid var(--line); border-radius: 0.75rem; padding: 1rem 1.25rem; }
-    .card h2 { font-size: 1.0625rem; font-weight: 600; color: var(--marine); }
-    .ph { margin-top: 0.25rem; color: #64748b; }
-    /* Reasoning box: light marine tint with a lightbulb, so it differs from the grey placeholders */
-    .why { position: relative; margin-top: 0.5rem; padding: 0.5rem 0.75rem 0.5rem 2.25rem; background: var(--tint); border: 1px solid var(--tint-border); border-radius: 0.5rem; font-size: 0.875rem; color: var(--marine); }
-    .why::before { content: "💡"; position: absolute; left: 0.75rem; top: 0.5rem; }
-    .why b { font-weight: 600; }
-    /* Reasoning box in the advisory style: speaks to the reader directly, numbers in bold, small source line at the bottom */
-    .why-erik p + p { margin-top: 0.5rem; }
-    .why-erik .why-title { font-weight: 600; font-size: 0.9375rem; }
-    .why-erik .why-bron { font-size: 0.75rem; color: #475569; }
-    body.no-why .why { display: none; }
-    /* The one sentence each tab opens with */
-    .lead { font-size: 1.125rem; font-weight: 500; color: var(--marine); }
-    .lead-lg { font-size: 1.25rem; line-height: 1.5; }
-    /* Chain diagram (tab 1) */
-    .k-box { fill: #fff; stroke: var(--marine); stroke-width: 1.5; }
-    .k-name { font: 600 11.5px system-ui, sans-serif; fill: var(--marine); }
-    .k-arrow { stroke: var(--marine); stroke-width: 1.5; }
-    .k-bad { font: 10.5px system-ui, sans-serif; fill: #b91c1c; }
-    .k-good { font: 10.5px system-ui, sans-serif; fill: #047857; }
-    .k-bron { font: 9.5px system-ui, sans-serif; fill: #475569; text-decoration: underline; cursor: pointer; }
-    .k-bron:hover, .k-bron:focus { fill: var(--marine); outline: none; }
-    /* Timeline (tab 2) */
-    .t-month { font: 600 12px system-ui, sans-serif; fill: var(--marine); }
-    .t-lane { font: 600 11px system-ui, sans-serif; fill: #475569; }
-    .t-moet { fill: #f1f5f9; stroke: #cbd5e1; }
-    .t-intake { fill: var(--tint); stroke: var(--tint-border); }
-    .t-text { font: 10.5px system-ui, sans-serif; fill: #1e293b; }
-    .t-mile { font: 600 10.5px system-ui, sans-serif; fill: var(--marine); }
-    /* Process flows today / January (tab 3) */
-    .s-box { fill: #fff; stroke: var(--marine); stroke-width: 1.25; }
-    .s-box-new { fill: #fff; stroke: #059669; stroke-width: 1.5; }
-    .s-name { font: 600 10.5px system-ui, sans-serif; fill: var(--marine); }
-    .s-title { font: 600 12px system-ui, sans-serif; fill: var(--marine); }
-    .s-title-new { fill: #047857; }
-    .s-line { font: 10px system-ui, sans-serif; fill: #334155; }
-    .s-wait { font: 600 10px system-ui, sans-serif; fill: #b91c1c; }
-    .s-ai { font: 10px system-ui, sans-serif; fill: #047857; }
-    .s-ok { font: 10px system-ui, sans-serif; fill: #047857; }
-    .s-total { font: 600 11px system-ui, sans-serif; fill: var(--marine); }
-    .s-arrow { stroke: var(--marine); stroke-width: 1.25; }
-    .reden-btn[aria-pressed="true"] { background: var(--marine); color: #fff; border-color: var(--marine); font-weight: 600; }
-    /* One-line explanation under a card title */
-    .why-regel { margin-top: 0.375rem; padding-top: 0.25rem; padding-bottom: 0.25rem; font-size: 0.8125rem; }
-    .why-regel::before { top: 0.25rem; }
-    /* Source label next to a sentence */
-    .bron-btn { font-size: 0.75rem; color: #475569; text-decoration: underline; text-underline-offset: 2px; }
-    .bron-btn:hover { color: var(--marine); }
-    /* Phones: wide tables marked .stack-sm become stacked blocks, one card per row with the column name above
-       each value, so nothing falls off the screen. Desktop is unchanged. */
-    @media (max-width: 639px) {
-      table.stack-sm, table.stack-sm tbody, table.stack-sm tr, table.stack-sm th, table.stack-sm td { display: block; width: 100%; }
-      table.stack-sm thead, table.stack-sm tr.stack-head { display: none; }
-      table.stack-sm { border: 0; min-width: 0; }
-      table.stack-sm tr { border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.5rem 0.75rem; margin-top: 0.5rem; }
-      table.stack-sm th, table.stack-sm td { padding: 0.25rem 0; }
-      table.stack-sm tr > :first-child { font-weight: 600; color: var(--marine); }
-      table.stack-sm td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; font-weight: 600; color: #475569; }
-    }
-    /* Key numbers: marine text with an orange underline (orange text itself is too light to read). */
-    .keynum { font-weight: 600; color: var(--marine); box-shadow: inset 0 -2px 0 var(--orange); }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COO Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one reading column; the stack picker sits above two flow diagrams that redraw with the reader's own systems. */
+:root{
+  --paper:#f5f6f3;
+  --surface:#ffffff;
+  --ink:#16201f;
+  --muted:#5b6866;
+  --line:#d9dfdc;
+  --accent:#0d6b63;
+  --accent-soft:#e1efec;
+  --human:#9a4a17;
+  --human-soft:#f6e9df;
+  --ok:#2f7a3d; --warn:#9a6a00; --stop:#a3332b;
+  --display:"Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --body:"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111716; --surface:#18201f; --ink:#e6ecea; --muted:#9aa7a4; --line:#2c3735;
+    --accent:#5cc2b5; --accent-soft:#1d3532; --human:#e39a63; --human-soft:#3a2a1f;
+    --ok:#7ccb88; --warn:#e2b94f; --stop:#ef8a80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111716; --surface:#18201f; --ink:#e6ecea; --muted:#9aa7a4; --line:#2c3735;
+  --accent:#5cc2b5; --accent-soft:#1d3532; --human:#e39a63; --human-soft:#3a2a1f;
+  --ok:#7ccb88; --warn:#e2b94f; --stop:#ef8a80; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--body)}
+main{max-width:1040px;margin:0 auto;padding:40px 20px 80px;display:grid;gap:56px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(34px,5vw,48px);letter-spacing:-.01em}
+h2{font-size:26px}
+h3{font-size:18px}
+p{margin:0;max-width:68ch}
+.lede{font-size:18px;color:var(--muted)}
+.stack{display:grid;gap:14px}
+.eyebrow{font:500 13px/1 var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+.note{font-size:14px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* stack picker */
+.picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.field{display:grid;gap:6px}
+.field label{font-size:13px;font-weight:600}
+.field select,.field input{font:15px var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+.field input{display:none}
+.field input.show{display:block}
+
+/* flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;overflow-x:auto;padding-bottom:4px}
+.step{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:8px;padding:14px;display:grid;gap:8px;align-content:start;position:relative}
+.step.human{border-top-color:var(--human);background:var(--human-soft)}
+.step .n{font:500 12px var(--mono);color:var(--muted)}
+.step h3{font-size:16px}
+.step p{font-size:14px;color:var(--muted)}
+.sys{display:inline-block;font:500 12.5px/1.3 var(--mono);background:var(--accent-soft);color:var(--ink);border-radius:4px;padding:3px 7px;margin:2px 4px 2px 0}
+.step.human .sys{background:var(--surface)}
+.outputs{display:grid;gap:6px}
+.outputs div{font-size:13.5px}
+
+/* tables */
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 13px var(--body);color:var(--muted)}
+td.num{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font:500 12px/1 var(--mono);padding:4px 7px;border-radius:999px;white-space:nowrap}
+.p-ok{color:var(--ok);border:1px solid currentColor}
+.p-warn{color:var(--warn);border:1px solid currentColor}
+.p-stop{color:var(--stop);border:1px solid currentColor}
+
+/* role toggle */
+.toggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.toggle button{font:600 14px var(--body);padding:8px 16px;border:0;background:var(--surface);color:var(--ink);cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--accent);color:var(--paper)}
+.rag{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.rag{grid-template-columns:1fr}}
+.src{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.src:last-child{border-bottom:0}
+.qa{display:grid;gap:10px}
+.qbtn{text-align:left;font:15px var(--body);background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:9px 12px;cursor:pointer}
+.qbtn:hover{border-color:var(--accent)}
+.answer{border-left:3px solid var(--accent);padding:6px 0 6px 12px;font-size:14.5px;min-height:72px}
+.answer.blocked{border-left-color:var(--stop)}
+.cite{font:12.5px var(--mono);color:var(--muted);display:block;margin-top:6px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+ul,ol{margin:0;padding-left:20px;display:grid;gap:6px}
+li{max-width:68ch}
+.phase{border-left:4px solid var(--line);padding-left:14px}
+
+/* mockup */
+.mock{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.mock-bar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--accent);color:var(--paper);font:600 14px var(--display)}
+.mono{font:500 12.5px var(--mono)}
+.mock-body{padding:20px;display:grid;gap:20px}
+.mock-mission p{font:600 18px/1.4 var(--display);max-width:60ch;margin-top:6px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:4px;background:var(--paper)}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi b{font:600 26px var(--display);font-variant-numeric:tabular-nums}
+.kpi small{font-size:12.5px;color:var(--muted)}
+.mock-cols{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+@media (max-width:760px){.mock-cols{grid-template-columns:1fr}}
+.upd{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:6px}
+.upd.draft{border-color:var(--human);background:var(--human-soft)}
+.upd-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.upd textarea,.askrow input{font:14.5px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;resize:vertical}
+.btns,.askrow{display:flex;gap:8px;flex-wrap:wrap}
+.btns button,.askrow button{font:600 13.5px var(--body);border:1px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:6px;padding:7px 12px;cursor:pointer}
+.btns button:disabled{opacity:.45;cursor:not-allowed}
+#btnApprove:not(:disabled){background:var(--accent);color:var(--paper)}
+.askrow input{flex:1;min-width:180px}
+.news{list-style:none;padding:0;gap:8px}
+.news li{font-size:14.5px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.news time{display:block;font:500 12px var(--mono);color:var(--muted)}
+.ask{display:grid;gap:8px}
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){.sys{transition:background .2s}}
+#tryBox textarea{font:14.5px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;resize:vertical}
+#tryBox select{font:14px var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+#tryBox .btns{align-items:center}
+#tryBox .btns button:disabled{opacity:.45;cursor:not-allowed}
+#tryBox th,#tryBox td{text-align:left;vertical-align:top;padding:6px 8px;font-size:13.5px}
+#tryBox .pill{margin:0 4px 4px 0}
+</style>
 </head>
-<body class="bg-page text-slate-800 font-sans">
+<body>
+<main>
 
-  <header class="bg-marine text-white">
-    <div class="mx-auto max-w-[1000px] px-4 py-6">
-      <h1 class="text-2xl sm:text-3xl font-semibold">COO-Lab</h1>
-      <p class="mt-2 text-base sm:text-lg text-white/85">Module 1: decision log from a meeting transcript.</p>
-      <!-- The advice boxes ("Toelichting") are shown by default; remove "checked" from the checkbox to hide them at the start. -->
-      <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-        <label class="flex flex-wrap items-center gap-x-2 text-sm text-white/90 cursor-pointer">
-          <input type="checkbox" id="showWhy" checked class="accent-[var(--orange)]"> Toelichting
-          <span class="w-full pl-6 text-xs text-white/70 sm:w-auto sm:pl-0">(waarom we dit adviseren, met cijfers en bronnen)</span>
-        </label>
-        <button type="button" id="openGlossary" class="text-sm text-white underline decoration-[var(--orange)] decoration-2 underline-offset-4 hover:text-white/80">Begrippenlijst</button>
+<header class="stack">
+  <span class="eyebrow">Stage 0 · AI-Native Baseline</span>
+  <h1>COO Lab</h1>
+  <p class="lede">A working example of AI-native operations for a COO at a three-year-old bio-AI company: leadership decisions become a decision log and an action tracker, and the all-hands becomes an always-on page that leadership updates every week and everyone can ask questions. No decks or documents to send around.</p>
+  <p class="note">Built by Barbara van Asten for the AI Operations / Chief of Staff application at Bioptimus. I have no view of Bioptimus's internal tools, so COO Lab is a pattern, not a product to install: it runs on the stack a company already has. All example data on this page is fictional.</p>
+</header>
 
-      </div>
+<section class="stack" aria-labelledby="h-stack">
+  <h2 id="h-stack">1. Put in your own stack</h2>
+  <p>Choose the tools your company already uses. Both flows below redraw with your systems, so you can see where each step would run.</p>
+  <div class="card picker" id="picker"></div>
+</section>
+
+<section class="stack" aria-labelledby="h-m1">
+  <span class="eyebrow">Module 1 · Decision to action</span>
+  <h2 id="h-m1">2. From leadership meeting to action</h2>
+  <p>Every decision gets an owner, a date, a link to a company goal and a confidentiality label. Nothing is published before the COO approves it.</p>
+  <div class="flow" id="flow1"></div>
+  <div class="card stack">
+    <h3>Example output: decision log (fictional company)</h3>
+    <div class="tbl">
+    <table>
+      <thead><tr><th>Decision</th><th>Owner</th><th>Due</th><th>Goal it moves</th><th>Label</th><th>Check</th></tr></thead>
+      <tbody>
+        <tr><td>Add two hospital partners to the data programme in Q1</td><td>Head of Partnerships</td><td class="num">31 Mar</td><td>OKR 1: patient cohorts onboarded</td><td>All-hands</td><td><span class="pill p-ok">ready</span></td></tr>
+        <tr><td>Move the platform release to the February cadence</td><td>VP Engineering</td><td class="num">14 Feb</td><td>OKR 3: enterprise delivery</td><td>All-hands</td><td><span class="pill p-warn">reversed in meeting, final version kept</span></td></tr>
+        <tr><td>Start investor update for the next round</td><td>CEO</td><td class="num">missing</td><td>Funding runway</td><td>Board only</td><td><span class="pill p-stop">no date · excluded from all-hands</span></td></tr>
+        <tr><td>Pilot AI contract review in Legal</td><td>missing</td><td class="num">31 Jan</td><td>OKR 4: lean operating functions</td><td>All-hands</td><td><span class="pill p-stop">no owner</span></td></tr>
+      </tbody>
+    </table>
     </div>
-  </header>
-
-  <!-- The tabs, one per deliverable of the case. data-tab says which section each button opens. -->
-  <div class="bg-white border-b border-line">
-    <nav class="mx-auto max-w-[1000px] px-4 flex flex-wrap gap-x-4 text-sm" role="tablist">
-
-
-
-      <button data-tab="prototype" role="tab" class="tab py-3 -mb-px border-b-[3px] border-transparent text-marine opacity-70 aria-selected:opacity-100 aria-selected:font-semibold aria-selected:border-accent">Module 1</button>
-
-
-
-    </nav>
+    <p class="note">The model extracts; rules check. Missing owners and dates are flagged, never guessed. A decision mentioned twice is merged, and a decision changed later in the meeting keeps only its final version.</p>
   </div>
-
-  <main class="mx-auto max-w-[1000px] px-4 py-5">
-    <!-- Each tab opens with one sentence (.lead) and fits on about one screen. -->
-
-    <!-- Tab 4: Prototype: one storingsmelding in, fields + what is missing out, two concepts a person approves. -->
-    <section data-panel="prototype" class="space-y-4">
-      <p class="lead lead-lg">Module 1: meeting transcript in, decision table out, with a cleared all-hands paragraph.</p>
-      <div class="card">
-        <h2>Try it</h2>
-        <p class="ph">The transcript below is fictional (Helix Labs, test 6). Paste your own to try another; use invented text only.</p>
-        <textarea id="transcript" rows="12" class="mt-2 w-full p-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-accent"></textarea>
-        <div class="mt-2 flex flex-wrap items-center gap-3">
-          <button id="run" class="px-4 py-2 rounded-lg bg-accent text-marine font-medium hover:bg-accent-hover disabled:opacity-60">Run</button>
-          <label class="text-sm text-slate-600">Model <select id="demoModel" data-models class="ml-1 p-1.5 border border-slate-300 rounded bg-white"></select></label>
-        </div>
-        <p id="status" class="mt-2 text-sm text-slate-600"></p>
-      </div>
-      <div id="result" class="hidden space-y-4">
-        <div class="card">
-          <h2>Decisions</h2>
-          <div class="mt-2 overflow-x-auto"><table class="w-full text-sm" id="decisionTable"></table></div>
-          <ul id="notes" class="mt-2 list-disc pl-5 text-xs text-slate-600"></ul>
-        </div>
-        <div class="card">
-          <h2>All-hands paragraph</h2>
-          <p class="ph">Written only from items that are agreed and labelled all_hands.</p>
-          <p id="allHands" class="mt-2 text-sm"></p>
-          <p id="runInfo" class="mt-2 text-xs text-slate-500"></p>
-        </div>
-      </div>
-    </section>
-
-  <footer class="mx-auto max-w-[1000px] px-4 pb-8 pt-2 text-center text-xs text-slate-600">OptiAI Strategy | Product-to-Value Business Case · © 2026 OptiAI Strategy. Alle rechten voorbehouden. Raamwerken van derden blijven toegeschreven aan hun eigenaren. · <a href="build.html" class="underline underline-offset-2 hover:text-marine">Zo is dit gebouwd</a></footer>
-
-  <!-- Glossary: one small popover for the ⓘ buttons, and one dialog with all terms -->
-  <div id="termPop" role="tooltip" class="hidden fixed z-50 w-72 max-w-[calc(100vw-2rem)] rounded border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-lg"></div>
-  <dialog id="glossary" class="w-[36rem] max-w-[calc(100vw-2rem)] rounded-xl p-0 backdrop:bg-slate-900/40">
-    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-      <h2 class="text-lg font-semibold text-marine">Begrippenlijst</h2>
-      <button type="button" id="closeGlossary" class="px-2 text-slate-500 hover:text-slate-800" aria-label="Begrippenlijst sluiten">✕</button>
+  <div class="card stack" id="tryBox">
+    <h3>Try it: run a meeting transcript</h3>
+    <p class="note">The transcript below is fictional (Helix Labs, test 6). Paste your own to try another; use invented text only.</p>
+    <textarea id="tryText" rows="12" aria-label="Meeting transcript"></textarea>
+    <div class="btns">
+      <button type="button" id="tryRun">Run</button>
+      <label class="note">Model <select id="tryModel" aria-label="Model"></select></label>
     </div>
-    <dl id="glossaryList" class="max-h-[70vh] overflow-y-auto px-4 py-3 space-y-3 text-sm"></dl>
-  </dialog>
+    <p class="note" id="tryStatus" role="status"></p>
+    <div id="tryResult" hidden class="stack">
+      <div class="tbl"><table id="tryTable"></table></div>
+      <ul class="note" id="tryNotes"></ul>
+      <h3>All-hands paragraph</h3>
+      <p class="note">Written only from items that are agreed and labelled all_hands.</p>
+      <p id="tryAllHands"></p>
+      <p class="note" id="tryInfo"></p>
+    </div>
+  </div>
+</section>
 
-  <script>
-    // Glossary: one sentence per term, in plain language for a non-technical client.
-    // On Monday, add terms for the case here.
-    const GLOSSARY = {
-      "Antwoordsleutel": "De juiste antwoorden die we vooraf per testcasus hebben vastgelegd.",
-      "Overeenkomst met antwoordsleutel": "Hoeveel velden het model precies goed had, gecontroleerd door code.",
-      "Beoordelaar": "Een tweede AI-model, van een andere aanbieder, dat beoordeelt hoe helder de controlereden is.",
-      "Controlereden": "De uitleg van het model in één zin: wat ontbreekt, of waarom een mens moet controleren.",
-      "Testset": "Fictieve oefencasussen waarmee we het prototype elke keer op dezelfde manier meten.",
-      "Tokens": "De kleine stukjes tekst die een model leest en schrijft; de kosten worden per token berekend.",
-      "Kosten per aanroep": "Wat één verzoek aan het model kost, op basis van het aantal tokens.",
-      "Reactietijd": "Hoe lang het model nodig heeft om één verzoek te beantwoorden.",
-      "Drempel": "Het minimale aandeel velden dat met de antwoordsleutel moet overeenkomen (95%), en berichttype moet in elke casus goed zijn, om voor de testset te slagen.",
-      "Haiku / Sonnet": "Twee Claude-modellen; Haiku is klein, snel en goedkoop, Sonnet is sterker en duurder.",
-      "Schema": "De vaste lijst velden die we verwachten, zodat het model ook kan melden wat ontbreekt.",
-      "Berichttype": "De eerste controle: wat voor bericht is dit (storing, statusvraag, factuur-ISDE, offerte of overig)? Alleen een storing wordt verder uitgelezen.",
-      "Controle nodig": "Het model geeft aan dat een mens moet controleren voordat er iets wordt verwerkt.",
-      "Menselijke controle": "Een mens keurt de uitkomst van de AI goed of corrigeert die, voordat die wordt gebruikt.",
-      "Waardematrix": "Een raster dat laat zien waar een AI-toepassing waarde oplevert, per gebied en naar het moment waarop die waarde zichtbaar wordt.",
-      "Tijdshorizon": "Hoe lang het duurt voordat een soort waarde zichtbaar wordt.",
-      "Directe impact": "Waarde die binnen ongeveer zes maanden zichtbaar is, en die een pilot kan aantonen.",
-      "Uitgestelde impact": "Waarde die in 6 tot 24 maanden opbouwt, terwijl mensen en processen zich aanpassen.",
-      "Indirecte impact": "Waarde die via een neveneffect ontstaat, bijvoorbeeld tevredener klanten doordat antwoorden sneller komen.",
-      "Toekomstige impact": "Strategische of technologische waarde die eerst vaak onzichtbaar is, zoals nieuwe diensten of een herbruikbaar platform.",
-      "ROI": "Return on investment: het financiële rendement, zoals lagere kosten of hogere omzet.",
-      "ROE": "Return on employees: de waarde voor medewerkers, zoals minder repeterend werk en beter behoud.",
-      "ROF": "Return on the future: waarde die de organisatie voorbereidt op wat komt, zoals data, vaardigheden en platforms.",
-      "Gartner-waardedimensies": "De drie manieren waarop AI volgens Gartner waarde oplevert: rendement op investering, op medewerkers en op de toekomst.",
-      "Balanced Scorecard": "Een managementmodel dat prestaties vanuit vier invalshoeken bekijkt: financieel, klant, interne processen, en leren en groeien.",
-      "Pilot": "Een kleine proef van beperkte duur met echte gebruikers, om de waarde aan te tonen vóór een bredere invoering.",
-      "EU AI Act": "Europese wet voor het gebruik van AI; naar onze inschatting valt deze assistent niet onder de strengste regels, te toetsen met een jurist.",
-      "AVG": "De Europese privacywet: regels voor het omgaan met persoonsgegevens zoals namen en adressen.",
-      "DPIA": "Een beoordeling vooraf van de privacyrisico's van een nieuwe werkwijze; of die nodig is, toetsen we met een privacyfunctionaris of jurist.",
-      "Ondernemingsraad (OR)": "Het overlegorgaan van de medewerkers, dat bij maatregelen zoals meten per medewerker kan moeten instemmen.",
-      "AI-geletterdheid": "Genoeg kennis om verstandig met AI te werken: wat het kan, wat niet, en wanneer je zelf controleert.",
-      "ISO 27001": "Internationale norm voor informatiebeveiliging, dus voor hoe je gegevens beschermt.",
-      "ISO 9001": "Internationale norm voor kwaliteitsmanagement, onder meer voor beheerde documenten en vaste werkwijzen.",
-      "Feedbackloop": "Vaste cyclus waarin correcties van medewerkers worden bekeken en de assistent daarna wordt verbeterd.",
-      "Meeschrijven": "Testfase waarin de assistent een concept maakt zonder dat er iets naar buiten gaat, zodat de medewerker kan vergelijken.",
-      "Uploadlink": "Een link in de mail waarmee de klant zelf een foto van het typeplaatje kan toevoegen.",
-      "Go/no-go": "Het beslismoment waarop we op basis van de cijfers kiezen: uitrollen, bijsturen of stoppen.",
-    };
+<section class="stack" aria-labelledby="h-m2">
+  <span class="eyebrow">Module 2 · The all-hands page (Extend with RAG)</span>
+  <h2 id="h-m2">3. An always-on all-hands page you can ask</h2>
+  <p>The all-hands is no longer a deck. It is one live page with vision, mission, targets, delivery status, the decision log and each leader's weekly status update. In the weekly all-hands, leadership walks through what changed on the page; between meetings, anyone can ask it a question and get an answer with its source.</p>
+  <p>What the page can search depends on who is asking. Access is filtered before the model reads anything, so a colleague's question never reaches leadership-only text.</p>
+  <div class="flow" id="flow2"></div>
+  <div><div class="toggle" role="group" aria-label="Ask as">
+    <button type="button" id="r-lead" aria-pressed="true">Ask as Leadership</button>
+    <button type="button" id="r-col" aria-pressed="false">Ask as Colleague</button>
+  </div></div>
+  <div class="rag">
+    <div class="card">
+      <h3 style="margin-bottom:8px">What this role can search</h3>
+      <div id="sources"></div>
+    </div>
+    <div class="card qa">
+      <h3>Try a question</h3>
+      <div id="questions" class="qa"></div>
+      <div id="answer" class="answer" aria-live="polite"><span class="note">Pick a question to see what COO Lab would answer for this role.</span></div>
+    </div>
+  </div>
+</section>
 
-    // The ⓘ button next to a term. Tapping it opens the popover; tapping again closes it.
-    const termPop = document.getElementById('termPop');
-    let openTerm = null;
-    function termIcon(term) {
-      if (!GLOSSARY[term]) return document.createTextNode('');
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'term-btn ml-1 px-0.5 align-baseline font-normal text-marine hover:opacity-70';
-      b.textContent = 'ⓘ';
-      b.setAttribute('aria-label', 'Wat is ' + term + '?');
-      b.onclick = e => { e.preventDefault(); openTerm === b ? closeTerm() : showTerm(b, term); };
-      return b;
+<section class="stack" aria-labelledby="h-m3">
+  <span class="eyebrow">Module 3 · Weekly status update</span>
+  <h2 id="h-m3">4. How the weekly updates get onto the page</h2>
+  <p>Leaders don't start from a blank page. The leadership meeting transcript already holds most of their status, so COO Lab drafts each leader's update from it. The leader then adds or corrects by speaking instead of typing: a Stanford study found speech input about three times faster than typing on a phone keyboard (<a href="https://news.stanford.edu/stories/2016/08/stanford-study-speech-recognition-faster-texting">Stanford, 2016</a>).</p>
+  <div class="flow" id="flow3"></div>
+</section>
+
+<section class="stack" aria-labelledby="h-mock">
+  <span class="eyebrow">Mockup</span>
+  <h2 id="h-mock">5. The always-on all-hands page</h2>
+  <p class="note">Concept mockup. Company news comes from Bioptimus's public website and press releases (latest first). Internal KPIs and leadership updates are placeholders, shown as [...]. Try the draft card: dictate, tidy, approve. Microphone access is off in this preview, so the dictation is simulated.</p>
+  <div class="mock">
+    <div class="mock-bar"><span>All-hands</span><span class="mono">Week 47 · updated Thu 19 Nov</span></div>
+    <div class="mock-body">
+      <div class="mock-mission"><span class="eyebrow">Mission</span><p>Build the first universal AI foundation model for biology, to fuel breakthrough discoveries and accelerate innovation in biomedicine.</p></div>
+
+      <div class="kpis">
+        <div class="kpi"><span>STELA specimens profiled</span><b>[...]</b><small>Target: up to 100,000</small></div>
+        <div class="kpi"><span>Pharma companies using our models</span><b>[...]</b><small>Public: 16 of top 20</small></div>
+        <div class="kpi"><span>M-Optimus early-access partners</span><b>[...]</b><small>Goal: [...]</small></div>
+        <div class="kpi"><span>Decisions closed this week</span><b>[...]</b><small>Open, overdue: [...]</small></div>
+      </div>
+
+      <div class="mock-cols">
+        <div class="stack">
+          <h3>Leadership updates this week</h3>
+          <div class="upd"><div class="upd-h"><b>CEO</b><span class="pill p-ok">published</span></div><p>[...]</p><span class="cite">Drafted from leadership meeting 18 Nov · approved</span></div>
+          <div class="upd"><div class="upd-h"><b>Science</b><span class="pill p-ok">published</span></div><p>[...]</p><span class="cite">Dictated · 2 min · approved</span></div>
+          <div class="upd draft" id="draftCard">
+            <div class="upd-h"><b>Platform &amp; Engineering</b><span class="pill p-warn" id="draftPill">draft</span></div>
+            <label class="note" for="draftText">Drafted from the leadership meeting. Add or correct by voice.</label>
+            <textarea id="draftText" rows="5">Release moved to the February cadence so enterprise delivery stays on one schedule. Owner: VP Engineering.</textarea>
+            <div class="btns">
+              <button type="button" id="btnDictate">Dictate update</button>
+              <button type="button" id="btnTidy" disabled>Tidy with AI</button>
+              <button type="button" id="btnApprove" disabled>Approve and publish</button>
+            </div>
+            <span class="cite" id="draftMeta">Source: leadership meeting 18 Nov, All-hands items only</span>
+          </div>
+          <div class="upd"><div class="upd-h"><b>Commercial</b><span class="pill p-stop">no update · 9 days</span></div><p>[...]</p><span class="cite">Flagged: weekly update missing</span></div>
+        </div>
+        <div class="stack">
+          <h3>Company news</h3>
+          <ul class="news">
+            <li><time>Aug 2026</time> Partnership with Cancer Research Horizons, the innovation arm of Cancer Research UK, to train and evaluate the foundation model.</li>
+            <li><time>Jun 2026</time> Partnership with FFCD, the French digestive cancer research federation, adds a European cohort to STELA; FFCD gets M-Optimus access for its research.</li>
+            <li><time>Mar 2026</time> STELA launched with 10x Genomics and Broad Clinical Labs: up to 100,000 patient specimens to scale M-Optimus.</li>
+            <li><time>Dec 2025</time> M-Optimus unveiled; H-Optimus-1 offered on Amazon SageMaker.</li>
+          </ul>
+          <h3>Decisions this week</h3>
+          <ul class="news"><li>[...]</li><li>[...]</li></ul>
+          <div class="ask">
+            <label for="askInput" class="note">Ask the all-hands page</label>
+            <div class="askrow"><input id="askInput" type="text" value="What changed this week?"><button type="button" id="btnAsk">Ask</button></div>
+            <div class="answer" id="askAnswer"><span class="note">Answers come with their source. Try the question above.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stack" aria-labelledby="h-base">
+  <h2 id="h-base">6. The baseline these modules enforce</h2>
+  <div class="grid2">
+    <div class="card stack">
+      <h3>Meeting cadence</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Forum</th><th>Job</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td>Weekly leadership</td><td>Decide, not report</td><td>Decision log</td></tr>
+          <tr><td>Weekly all-hands</td><td>Leadership walks through what changed on the live page</td><td>Updated all-hands page, no deck</td></tr>
+          <tr><td>Monthly Collaboration Week</td><td>Progress against OKRs, trade-offs</td><td>Updated targets</td></tr>
+          <tr><td>Quarterly</td><td>OKR reset, board and investor prep</td><td>Board pack</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Each leader posts a weekly status update on the all-hands page before the meeting. Meeting time is for decisions; nothing is distributed as a file.</p>
+    </div>
+    <div class="card stack">
+      <h3>Decision rules</h3>
+      <ol>
+        <li>Every decision has one owner and a due date.</li>
+        <li>Every decision names the goal or OKR it moves.</li>
+        <li>The trade-off is written down in one line.</li>
+        <li>Every decision carries a label: <b>All-hands</b>, <b>Leadership only</b> or <b>Board only</b>.</li>
+        <li>A changed decision gets a new entry; the old one stays visible.</li>
+      </ol>
+    </div>
+    <div class="card stack">
+      <h3>AI fluency curriculum (non-R&amp;D teams)</h3>
+      <ol>
+        <li><b>Build your own workflow:</b> each person automates one recurring task from their own week.</li>
+        <li><b>Sensitive data:</b> what may go into which tool, and why the labels above exist.</li>
+        <li><b>Check the output:</b> test cases, sources and when a human signs off.</li>
+      </ol>
+      <p class="note">Success measure: workflows still in use after 90 days, not attendance.</p>
+    </div>
+    <div class="card stack">
+      <h3>Route choice</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Part</th><th>Route</th></tr></thead>
+        <tbody>
+          <tr><td>Transcript</td><td>Consume: the meeting tool already in use</td></tr>
+          <tr><td>Module 1</td><td>Embed: own small app on the contracted AI provider, fixed schema, rule checks, approval step</td></tr>
+          <tr><td>Module 2</td><td>Extend with RAG: the all-hands page is a knowledge problem, solved by retrieval with role-based access and citations</td></tr>
+          <tr><td>Rejected</td><td>Fine-tuning (no labelled data, behaviour is solved by schema), Build (not relevant)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section class="stack" aria-labelledby="h-tests">
+  <h2 id="h-tests">7. Where it can fail, and the test for each</h2>
+  <div class="card tbl"><table>
+    <thead><tr><th>Risk</th><th>Test case</th><th>Pass when</th></tr></thead>
+    <tbody>
+      <tr><td>Confidential item reaches the all-hands</td><td>Fundraising discussed next to a product decision</td><td>All-hands text has no board or fundraising content</td></tr>
+      <tr><td>Decision without owner or date</td><td>"Someone should look into this by Q1"</td><td>Flagged as missing, not filled in</td></tr>
+      <tr><td>Decision reversed later in the meeting</td><td>Release moved, then moved back</td><td>Only the final position is logged</td></tr>
+      <tr><td>Duplicate</td><td>Same decision mentioned at the start and in the wrap-up</td><td>One entry</td></tr>
+      <tr><td>Transcript error</td><td>Model or partner name misheard</td><td>Low-confidence names marked for review</td></tr>
+      <tr><td>Wrong access</td><td>Colleague asks about a leadership-only decision</td><td>No answer from that source; points to the owner</td></tr>
+      <tr><td>Stale status on the page</td><td>A leader skips the weekly update</td><td>Section shows its last update date and is flagged after 7 days</td></tr>
+      <tr><td>Automatic publishing</td><td>Any run</td><td>Nothing goes out without COO approval</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="stack" aria-labelledby="h-next">
+  <h2 id="h-next">8. Phase 2 (indicated, not built)</h2>
+  <div class="grid2">
+    <div class="phase stack"><h3>KPI and measurement scorecard</h3><p>One scorecard across R&amp;D, Commercial and Operations. The decision log supplies the first operations metrics: time from decision to done, and the share of decisions with an owner and date.</p></div>
+    <div class="phase stack"><h3>Research-to-delivery handoff</h3><p>Gates between exploratory research and the teams that ship to enterprise customers. Each gate is a decision type, so it follows the same decision rules and lands in the same log.</p></div>
+  </div>
+</section>
+
+<section class="stack" aria-labelledby="h-ctx">
+  <h2 id="h-ctx">Context and assumptions</h2>
+  <div class="grid2">
+    <div class="stack">
+      <h3>Why this matters for a bio-AI company</h3>
+      <p class="note">Bioptimus states it works with 16 of the top 20 pharma companies and 1,000+ institutions, and that 60% of its team hold PhDs (<a href="https://www.bioptimus.com/">bioptimus.com</a>). Its models are for research use only and are deployed on AWS SageMaker or on-premise (<a href="https://docs.bioptimus.com/documentation/introduction">documentation</a>). A company running exploratory research next to enterprise delivery needs decisions that are light on process and clear on ownership.</p>
+    </div>
+    <div class="stack">
+      <h3>Assumptions</h3>
+      <ol class="note">
+        <li>Leadership meetings are recorded and transcribed, with consent.</li>
+        <li>There is a weekly leadership meeting and a weekly all-hands.</li>
+        <li>Confidentiality labels do not exist yet; the decision rules introduce them.</li>
+        <li>AI fluency training covers legal, HR, finance, commercial ops and the internal AI ops team.</li>
+        <li>The workspace, meeting tool and AI provider are unknown; COO Lab uses a neutral schema that works with any of them.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<footer>COO Lab · Barbara van Asten · OptiAI Strategy · 2026. Example data is fictional; no Bioptimus internal information was used.</footer>
+</main>
+
+<script>
+const FIELDS = [
+  {id:"meet", label:"Meeting tool", opts:["Google Meet","Zoom","Microsoft Teams","Notion AI notes"]},
+  {id:"ai", label:"AI provider under contract", opts:["Claude (Anthropic)","OpenAI","Gemini (Google)","Mistral","AWS Bedrock"]},
+  {id:"docs", label:"Documents and decision log", opts:["Google Docs","Notion","Confluence","SharePoint"]},
+  {id:"track", label:"Action tracker", opts:["Jira","Linear","Asana","Notion"]},
+  {id:"chat", label:"Team chat for the all-hands", opts:["Slack","Microsoft Teams","Google Chat"]},
+  {id:"kb", label:"Knowledge base to search", opts:["Google Drive","Notion","Confluence","SharePoint"]}
+];
+const state = {meet:"Google Meet", ai:"Claude (Anthropic)", docs:"Google Docs", track:"Jira", chat:"Slack", kb:"Google Drive"};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sys = k => `<span class="sys">${esc(state[k] || "your tool")}</span>`;
+
+function buildPicker(){
+  const p = document.getElementById("picker");
+  p.innerHTML = FIELDS.map(f => `
+    <div class="field">
+      <label for="sel-${f.id}">${f.label}</label>
+      <select id="sel-${f.id}">${f.opts.map(o=>`<option>${o}</option>`).join("")}<option value="__other">Other…</option></select>
+      <input id="in-${f.id}" type="text" placeholder="Type your tool" aria-label="${f.label}, other">
+    </div>`).join("");
+  FIELDS.forEach(f => {
+    const sel = document.getElementById("sel-"+f.id), inp = document.getElementById("in-"+f.id);
+    sel.addEventListener("change", () => {
+      if (sel.value === "__other"){ inp.classList.add("show"); inp.focus(); state[f.id] = inp.value || "your tool"; }
+      else { inp.classList.remove("show"); state[f.id] = sel.value; }
+      render();
+    });
+    inp.addEventListener("input", () => { state[f.id] = inp.value.trim() || "your tool"; render(); });
+  });
+}
+
+function renderFlow1(){
+  document.getElementById("flow1").innerHTML = `
+    <div class="step"><span class="n">01 · Capture</span><h3>Transcript</h3>${sys("meet")}<p>The meeting tool already records and transcribes. No new recorder.</p></div>
+    <div class="step"><span class="n">02 · Extract</span><h3>Decisions to schema</h3><span class="sys">COO Lab</span>${sys("ai")}<p>Decision, owner, due date, goal, label, source quote.</p></div>
+    <div class="step"><span class="n">03 · Check</span><h3>Rules, not AI</h3><span class="sys">COO Lab rules</span><p>Missing owner or date, duplicates, reversals, confidential items.</p></div>
+    <div class="step human"><span class="n">04 · Approve</span><h3>COO signs off</h3><span class="sys">COO</span><p>Corrects flags, approves. Nothing is sent before this.</p></div>
+    <div class="step"><span class="n">05 · Publish</span><h3>Three outputs</h3>
+      <div class="outputs">
+        <div>Decision log ${sys("docs")}</div>
+        <div>Actions ${sys("track")}</div>
+        <div>All-hands page ${sys("kb")}</div>
+        <div>"What changed" note ${sys("chat")}</div>
+      </div></div>`;
+}
+
+function renderFlow2(){
+  document.getElementById("flow2").innerHTML = `
+    <div class="step"><span class="n">01 · Sources</span><h3>Always-on content</h3>${sys("kb")}${sys("docs")}<p>Vision, mission, OKRs, delivery status, decision log, weekly leadership updates.</p></div>
+    <div class="step"><span class="n">02 · Index</span><h3>Labelled chunks</h3><span class="sys">COO Lab index</span><p>Each piece keeps its label: All-hands, Leadership only, Board only.</p></div>
+    <div class="step human"><span class="n">03 · Who asks</span><h3>Role filter</h3><span class="sys">Leadership</span><span class="sys">Colleague</span><p>Access is checked before retrieval.</p></div>
+    <div class="step"><span class="n">04 · Answer</span><h3>Answer with source</h3>${sys("ai")}<p>Answers only from what this role may see, with a citation.</p></div>
+    <div class="step"><span class="n">05 · Where</span><h3>Asked from</h3>${sys("kb")}${sys("chat")}<p>On the all-hands page itself, or as a question in chat.</p></div>`;
+}
+
+const SOURCES = [
+  {name:"Vision and mission", lead:true, col:true},
+  {name:"Company OKRs and targets", lead:true, col:true},
+  {name:"Delivery status and roadmap", lead:true, col:true},
+  {name:"Weekly leadership updates", lead:true, col:true},
+  {name:"Decision log: All-hands items", lead:true, col:true},
+  {name:"Decision log: Leadership only", lead:true, col:false},
+  {name:"Board and fundraising material", lead:false, col:false, note:"not indexed"}
+];
+const QUESTIONS = {
+  lead:[
+    {q:"Which Q1 decisions still have no owner?", a:"One: \"Pilot AI contract review in Legal\" (due 31 Jan) has no owner. Suggest assigning it in this week's leadership meeting.", src:"Decision log: Leadership only + All-hands items"},
+    {q:"How are we tracking on patient cohorts this quarter?", a:"OKR 1 targets new hospital partners in Q1; two additions were decided, owner Head of Partnerships, due 31 Mar. Status: in progress.", src:"Company OKRs and targets · Decision log"},
+    {q:"What did we decide on the investor update?", a:"Board and fundraising material is not in the index. Ask the CEO or COO directly.", src:"Not available in COO Lab by design", blocked:true}
+  ],
+  col:[
+    {q:"What changed this week?", a:"Three updates: two hospital partners are being added to the data programme in Q1, the platform release moved to the February cadence, and Legal starts an AI contract review pilot in January.", src:"Weekly leadership updates · Decision log: All-hands items"},
+    {q:"Why did the platform release move?", a:"The release moved to the February cadence so enterprise delivery stays on one schedule (OKR 3). Owner: VP Engineering.", src:"Decision log: All-hands items"},
+    {q:"Who owns the Legal AI pilot and is it approved?", a:"This decision has no published entry for your role yet. Ask your team lead; it will appear here once it is labelled All-hands.", src:"Leadership-only items are filtered out before the search", blocked:true}
+  ]
+};
+let role = "lead";
+function renderRag(){
+  document.getElementById("sources").innerHTML = SOURCES.map(s => {
+    const ok = role==="lead" ? s.lead : s.col;
+    const pill = ok ? '<span class="pill p-ok">searchable</span>' : `<span class="pill p-stop">${s.note || "filtered out"}</span>`;
+    return `<div class="src"><span>${s.name}</span>${pill}</div>`;
+  }).join("");
+  const qs = QUESTIONS[role];
+  document.getElementById("questions").innerHTML = qs.map((x,i)=>`<button type="button" class="qbtn" data-i="${i}">${x.q}</button>`).join("");
+  document.querySelectorAll(".qbtn").forEach(b => b.addEventListener("click", () => showAnswer(qs[+b.dataset.i])));
+  showAnswer(qs[0]);
+}
+function showAnswer(x){
+  const el = document.getElementById("answer");
+  el.className = "answer" + (x.blocked ? " blocked" : "");
+  el.innerHTML = `<b>${esc(x.q)}</b><br>${esc(x.a)}<span class="cite">Source: ${esc(x.src)} · via ${esc(state.ai)}</span>`;
+}
+function setRole(r){
+  role = r;
+  document.getElementById("r-lead").setAttribute("aria-pressed", r==="lead");
+  document.getElementById("r-col").setAttribute("aria-pressed", r==="col");
+  renderRag();
+}
+document.getElementById("r-lead").addEventListener("click", ()=>setRole("lead"));
+document.getElementById("r-col").addEventListener("click", ()=>setRole("col"));
+
+
+function renderFlow3(){
+  document.getElementById("flow3").innerHTML = `
+    <div class="step"><span class="n">01 · Input A</span><h3>Meeting transcript</h3>${sys("meet")}<p>Only items labelled All-hands go further.</p></div>
+    <div class="step"><span class="n">02 · Input B</span><h3>Leader speaks</h3><span class="sys">Voice to text</span><p>On laptop or phone, about 2 minutes instead of writing.</p></div>
+    <div class="step"><span class="n">03 · Draft</span><h3>One update per leader</h3><span class="sys">COO Lab</span>${sys("ai")}<p>Merges both inputs: what changed, why, what's next, KPI.</p></div>
+    <div class="step human"><span class="n">04 · Approve</span><h3>Leader signs off</h3><span class="sys">Each leader</span><p>Edits by voice or keyboard. Nothing appears unapproved.</p></div>
+    <div class="step"><span class="n">05 · Live</span><h3>Page updated</h3>${sys("kb")}${sys("chat")}<p>Searchable at once; chat gets a "what changed" note.</p></div>`;
+}
+const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const DICTATION = " Also: on-premise container install time is down to [...] hours for the first pharma pilot, and the SDK docs update ships next week.";
+const TIDIED = "What changed: platform release moved to the February cadence, so enterprise delivery stays on one schedule.\nProgress: on-premise install time for the first pharma pilot is [...] hours.\nNext: SDK documentation update ships next week.\nOwner: VP Engineering · KPI: [...]";
+const ta = () => document.getElementById("draftText");
+document.addEventListener("click", e => {
+  if (e.target.id === "btnDictate"){
+    const b = e.target; b.disabled = true; b.textContent = "Listening…";
+    const done = () => { b.textContent = "Dictated (simulated)"; document.getElementById("btnTidy").disabled = false;
+      document.getElementById("draftMeta").textContent = "Source: leadership meeting 18 Nov + dictation, 40 seconds"; };
+    if (reduce){ ta().value += DICTATION; done(); return; }
+    let i = 0; const t = setInterval(() => { ta().value += DICTATION.slice(i, i+3); i += 3; if (i >= DICTATION.length){ clearInterval(t); done(); } }, 25);
+  }
+  if (e.target.id === "btnTidy"){
+    ta().value = TIDIED; e.target.disabled = true; document.getElementById("btnApprove").disabled = false;
+    document.getElementById("draftMeta").textContent = "Tidied by " + state.ai + " into the update format · check before approving";
+  }
+  if (e.target.id === "btnApprove"){
+    e.target.disabled = true; const p = document.getElementById("draftPill");
+    p.className = "pill p-ok"; p.textContent = "published";
+    document.getElementById("draftCard").classList.remove("draft"); ta().readOnly = true;
+    document.getElementById("draftMeta").textContent = "Published to " + state.kb + " · note sent to " + state.chat;
+  }
+  if (e.target.id === "btnAsk"){
+    const q = document.getElementById("askInput").value.trim() || "What changed this week?";
+    document.getElementById("askAnswer").innerHTML = `<b>${esc(q)}</b><br>This week: the platform release moved to the February cadence, Science and the CEO posted updates ([...]), and Commercial has not updated in 9 days. Company news: the Cancer Research Horizons partnership (Aug 2026) is the latest public announcement.<span class="cite">Sources: leadership updates week 47 · company news · via ${esc(state.ai)}</span>`;
+  }
+});
+function render(){ renderFlow1(); renderFlow2(); renderFlow3(); renderRag(); }
+buildPicker(); render();
+</script>
+<script>
+// Try it box (Module 1): sends the transcript to /api/run (mode "module1"); the keys and prompts stay on the server.
+(function(){
+  const $ = id => document.getElementById(id);
+  const FLAGS = {missing_owner:'no owner', missing_date:'no date', missing_label:'no label', missing_status:'no status', missing_quote:'no quote', low_confidence:'low confidence', merged_duplicate:'merged duplicate'};
+  async function loadModels(){
+    let list = [], def = '';
+    try { const d = await (await fetch('/api/run')).json(); list = d.extract_models || []; def = d.default_model; } catch (e) {}
+    const sel = $('tryModel'); sel.replaceChildren();
+    if (!list.length) sel.append(new Option('Default', ''));
+    for (const m of list) sel.append(new Option(m.label, m.id, m.id === def, m.id === def));
+  }
+  loadModels();
+  fetch('tests.json').then(r => r.json()).then(t => { $('tryText').value = t.cases[5].input; }).catch(() => {});
+  const cell = (tag, text) => { const c = document.createElement(tag); c.textContent = text ?? ''; return c; };
+  const pillEl = (text, cls) => { const p = document.createElement('span'); p.className = 'pill ' + cls; p.textContent = text; return p; };
+  function show(d){
+    const t = $('tryTable'); t.replaceChildren();
+    const head = t.createTHead().insertRow();
+    for (const h of ['Decision','Owner','Due','Goal / OKR','Label','Status','Trade-off','Quote','Flags']) head.append(cell('th', h));
+    const body = t.createTBody();
+    if (!d.decisions.length) { const r = body.insertRow(); const c = cell('td', 'No decisions found.'); c.colSpan = 9; r.append(c); }
+    for (const x of d.decisions) {
+      const r = body.insertRow();
+      r.append(cell('td', x.decision), cell('td', x.owner ?? 'missing'), cell('td', x.due_date ?? 'missing'), cell('td', x.goal_or_okr ?? 'none'));
+      const l = cell('td', ''); l.append(x.label ? pillEl(x.label, x.label === 'all_hands' ? 'p-ok' : 'p-warn') : pillEl('none', 'p-stop')); r.append(l);
+      r.append(cell('td', x.status ?? 'missing'), cell('td', x.trade_off ?? 'none'), cell('td', x.source_quote ? '\u201c' + x.source_quote + '\u201d' : 'none'));
+      const f = cell('td', ''); for (const k of x.flags) f.append(pillEl(FLAGS[k] || k, 'p-warn')); r.append(f);
     }
-    function showTerm(button, term) { showPop(button, term, GLOSSARY[term]); }
-    // The same popover shows a source: its label and a short quote from the case.
-    function showPop(button, heading, body) {
-      const title = document.createElement('p');
-      title.className = 'font-medium text-marine';
-      title.textContent = heading;
-      const text = document.createElement('p');
-      text.className = 'mt-1';
-      text.textContent = body;
-      termPop.replaceChildren(title, text);
-      termPop.classList.remove('hidden');
-      openTerm = button;
-      placeTerm();
-    }
-    // Place it under the ⓘ, kept inside the screen with a 16px edge (above it if there is no room below).
-    function placeTerm() {
-      if (!openTerm) return;
-      const r = openTerm.getBoundingClientRect(), w = termPop.offsetWidth, h = termPop.offsetHeight;
-      termPop.style.left = Math.max(16, Math.min(r.left - 8, innerWidth - w - 16)) + 'px';
-      termPop.style.top = (r.bottom + 6 + h > innerHeight - 8 ? Math.max(8, r.top - h - 6) : r.bottom + 6) + 'px';
-    }
-    function closeTerm() { termPop.classList.add('hidden'); openTerm = null; }
-    // Tapping anywhere else or Esc closes it; while scrolling it stays next to its ⓘ.
-    document.addEventListener('click', e => { if (openTerm && !e.target.closest('.term-btn') && !termPop.contains(e.target)) closeTerm(); });
-    addEventListener('scroll', placeTerm, true);
-    addEventListener('resize', placeTerm);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTerm(); });
-
-    // Add an ⓘ to every element marked with data-term in the page.
-    document.querySelectorAll('[data-term]').forEach(s => s.append(termIcon(s.dataset.term)));
-
-    // Find a glossary term by its text, ignoring capitals (e.g. the field label "document type").
-    // Field name → glossary term, for fields whose name differs from the Dutch term. On Monday, add the case fields here.
-    const FIELD_TERMS = {};
-    const glossaryTerm = text => FIELD_TERMS[String(text).replaceAll(' ', '_')]
-      || Object.keys(GLOSSARY).find(k => k.toLowerCase() === String(text).toLowerCase());
-
-    // The "Glossary" link: all terms in one list, alphabetically.
-    const glossary = document.getElementById('glossary');
-    document.getElementById('openGlossary').onclick = () => {
-      const list = document.getElementById('glossaryList');
-      list.replaceChildren();
-      for (const term of Object.keys(GLOSSARY).sort((a, b) => a.localeCompare(b))) {
-        const dt = document.createElement('dt');
-        dt.className = 'font-medium text-marine';
-        dt.textContent = term;
-        const dd = document.createElement('dd');
-        dd.className = 'text-slate-600';
-        dd.textContent = GLOSSARY[term];
-        list.append(dt, dd);
-      }
-      closeTerm();
-      glossary.showModal();
-    };
-    document.getElementById('closeGlossary').onclick = () => glossary.close();
-    glossary.addEventListener('click', e => { if (e.target === glossary) glossary.close(); }); // tap outside closes
-
-    // Models and prices live on the server in api/_prompts.js; the server returns cost and response time per call.
-
-    // Tabs: show the chosen section and hide the others.
-    const tabs = document.querySelectorAll('[data-tab]');
-    const panels = document.querySelectorAll('[data-panel]');
-    function showTab(name) {
-      tabs.forEach(t => t.setAttribute('aria-selected', t.dataset.tab === name));
-      panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
-    }
-    // The open tab is kept in the address (e.g. index.html#oplossing), so a link can open a specific tab.
-    tabs.forEach(t => t.onclick = () => { showTab(t.dataset.tab); history.replaceState(null, '', '#' + t.dataset.tab); });
-    const tabFromUrl = () => { const h = location.hash.slice(1); return [...panels].some(p => p.dataset.panel === h) ? h : 'prototype'; };
-    addEventListener('hashchange', () => showTab(tabFromUrl()));
-    showTab(tabFromUrl());
-
-    // Advice boxes: the "Toelichting" switch shows or hides all of them.
-    const showWhy = document.getElementById('showWhy');
-    function updateWhy() { document.body.classList.toggle('no-why', !showWhy.checked); }
-    showWhy.onchange = updateWhy;
-    updateWhy();
-
-    // Links that open another tab, e.g. "Wat productie nodig heeft".
-    document.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => { showTab(b.dataset.goto); scrollTo(0, 0); });
-
-// Module 1: send the transcript to the server (mode "module1"), show the table and the all-hands text.
-    const $ = id => document.getElementById(id);
-    const FLAG_TEXT = { missing_owner: 'no owner', missing_date: 'no date', missing_label: 'no label', missing_status: 'no status', missing_quote: 'no quote', low_confidence: 'low confidence', merged_duplicate: 'merged duplicate' };
-
-    // Model choices come from the server (api/_prompts.js).
-    async function loadModels() {
-      let list = [], def = '';
-      try { const d = await (await fetch('/api/run')).json(); list = d.extract_models || []; def = d.default_model; } catch (e) { /* local preview */ }
-      for (const sel of document.querySelectorAll('select[data-models]')) {
-        sel.replaceChildren();
-        if (!list.length) sel.append(new Option('Default', ''));
-        for (const m of list) sel.append(new Option(m.label, m.id, m.id === def, m.id === def));
-      }
-    }
-    loadModels();
-
-    // Prefill with test 6 (fundraising next to a product decision).
-    fetch('tests.json').then(r => r.json()).then(t => { $('transcript').value = t.cases[5].input; }).catch(() => {});
-
-    function cell(tag, text, title) { const c = document.createElement(tag); c.textContent = text ?? ''; if (title) c.title = title; c.className = 'p-1.5 text-left align-top'; return c; }
-    function pill(text, warn) {
-      const p = document.createElement('span');
-      p.textContent = text;
-      p.className = 'mr-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ' + (warn ? 'bg-amber-100 text-amber-900' : 'bg-tint text-marine');
-      return p;
-    }
-
-    function showResult(d) {
-      const table = $('decisionTable');
-      table.replaceChildren();
-      const head = table.insertRow(); head.className = 'text-xs text-slate-500';
-      for (const h of ['Decision', 'Owner', 'Due', 'Goal / OKR', 'Label', 'Status', 'Trade-off', 'Quote', 'Flags']) head.append(cell('th', h));
-      if (!d.decisions.length) { const r = table.insertRow(); const c = cell('td', 'No decisions found.'); c.colSpan = 9; r.append(c); }
-      for (const x of d.decisions) {
-        const r = table.insertRow(); r.className = 'border-t border-line';
-        r.append(cell('td', x.decision), cell('td', x.owner ?? '—'), cell('td', x.due_date ?? '—'), cell('td', x.goal_or_okr ?? '—'));
-        const label = cell('td', ''); label.append(x.label ? pill(x.label, x.label !== 'all_hands') : pill('none', true)); r.append(label);
-        r.append(cell('td', x.status ?? '—'), cell('td', x.trade_off ?? '—'), cell('td', x.source_quote ? '“' + x.source_quote + '”' : '—'));
-        const flags = cell('td', ''); for (const f of x.flags) flags.append(pill(FLAG_TEXT[f] || f, true)); r.append(flags);
-      }
-      $('notes').replaceChildren(...d.notes.map(n => Object.assign(document.createElement('li'), { textContent: n })));
-      $('allHands').textContent = d.all_hands || 'No all-hands text for this transcript.';
-      $('runInfo').textContent = `${d.model} · ${(d.ms / 1000).toFixed(1)} s · $ ${(d.cost_usd ?? 0).toFixed(4)}`;
-      $('result').classList.remove('hidden');
-    }
-
-    $('run').onclick = async () => {
-      const input = $('transcript').value.trim();
-      if (!input) { $('status').textContent = 'Paste a transcript first.'; return; }
-      $('run').disabled = true; $('status').textContent = 'Running…'; $('result').classList.add('hidden');
-      try {
-        const r = await fetch('/api/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'module1', input, model: $('demoModel').value || undefined }) });
-        const d = await r.json();
-        if (!r.ok || d.error) $('status').textContent = d.error || 'Error ' + r.status;
-        else { $('status').textContent = ''; showResult(d); }
-      } catch (e) { $('status').textContent = 'No answer from /api/run. This only works on the Vercel link, not in a local preview.'; }
-      $('run').disabled = false;
-    };
-  
-  </script>
+    $('tryNotes').replaceChildren(...d.notes.map(n => cell('li', n)));
+    $('tryAllHands').textContent = d.all_hands || 'No all-hands text for this transcript.';
+    $('tryInfo').textContent = `${d.model} \u00b7 ${(d.ms / 1000).toFixed(1)} s \u00b7 $ ${(d.cost_usd ?? 0).toFixed(4)}`;
+    $('tryResult').hidden = false;
+  }
+  $('tryRun').onclick = async () => {
+    const input = $('tryText').value.trim();
+    if (!input) { $('tryStatus').textContent = 'Paste a transcript first.'; return; }
+    $('tryRun').disabled = true; $('tryStatus').textContent = 'Running...'; $('tryResult').hidden = true;
+    try {
+      const r = await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({mode:'module1', input, model: $('tryModel').value || undefined})});
+      const d = await r.json();
+      if (!r.ok || d.error) $('tryStatus').textContent = d.error || 'Error ' + r.status;
+      else { $('tryStatus').textContent = ''; show(d); }
+    } catch (e) { $('tryStatus').textContent = 'No answer from /api/run. This only works on the live link, not in a local preview.'; }
+    $('tryRun').disabled = false;
+  };
+})();
+</script>
 </body>
 </html>

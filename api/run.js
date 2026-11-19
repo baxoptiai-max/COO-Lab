@@ -1,61 +1,61 @@
 // One server function for the whole kit.
 // GET  -> the models the page may offer (from _prompts.js).
-// POST { mode, input, model } -> calls the model and returns JSON, token usage, response time and cost.
-// mode "extract" = the use case step, on Claude (Anthropic). mode "judge" = the eval judge, on OpenAI.
+// POST { mode: "module1", input, model } -> extracts decisions, applies the rule checks, writes the all-hands text.
 // The instructions, models and prices live in _prompts.js; any "system" field from the browser is ignored.
-// The keys come from the Vercel environment variables ANTHROPIC_API_KEY and OPENAI_API_KEY
-// and never reach the browser.
+// The key comes from the Vercel environment variable ANTHROPIC_API_KEY and never reaches the browser.
 
 import { applyRules, allHandsItems, leakedWords } from './_rules.js';
-import { prompts, fields, EXTRACT_MODELS, DEFAULT_EXTRACT_MODEL, EXTRACT_EFFORT, JUDGE_MODEL, PRICES } from './_prompts.js';
+import { prompts, fields, EXTRACT_MODELS, DEFAULT_EXTRACT_MODEL, EXTRACT_EFFORT, PRICES } from './_prompts.js';
+
+const MAX_INPUT = 12000;
+const RATE_LIMIT = 20, RATE_WINDOW_MS = 10 * 60 * 1000;
+const hits = new Map(); // ip -> request times; kept in memory, so it is per server instance
+
+// Simple per-IP limit: 20 requests per 10 minutes.
+function tooMany(ip) {
+  const now = Date.now();
+  const recent = (hits.get(ip) || []).filter(t => now - t < RATE_WINDOW_MS);
+  recent.push(now);
+  hits.set(ip, recent);
+  if (hits.size > 5000) for (const [k, v] of hits) if (!v.some(t => now - t < RATE_WINDOW_MS)) hits.delete(k);
+  return recent.length > RATE_LIMIT;
+}
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method === 'GET') {
     return res.status(200).json({
       extract_models: Object.entries(EXTRACT_MODELS).map(([id, m]) => ({ id, label: m.label })),
-      default_model: DEFAULT_EXTRACT_MODEL,
-      judge_model: JUDGE_MODEL
+      default_model: DEFAULT_EXTRACT_MODEL
     });
   }
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Gebruik GET of POST' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Use GET or POST' });
 
-  const { mode = 'extract', input = '', model } = req.body || {};
-  if (mode !== 'module1' && !Object.hasOwn(prompts, mode)) return res.status(400).json({ error: 'Onbekende modus' });
-  if (!input) return res.status(400).json({ error: 'Geen invoer ontvangen' });
-  if (String(input).length > 20000) return res.status(400).json({ error: 'Invoer te lang voor de demo' });
+  const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
+  if (tooMany(ip)) return res.status(429).json({ error: 'Too many requests. Try again in a few minutes.' });
 
-  // The judge always uses JUDGE_MODEL; the use case may only use a model from the allowlist.
-  const useModel = mode === 'judge' ? JUDGE_MODEL : (model || DEFAULT_EXTRACT_MODEL);
-  if (mode !== 'judge' && !Object.hasOwn(EXTRACT_MODELS, useModel)) return res.status(400).json({ error: 'Onbekend model' });
+  // Only Module 1 is public. The browser sends a transcript and may pick a model from the allowlist.
+  const { mode = 'module1', input = '', model } = req.body || {};
+  if (mode !== 'module1') return res.status(400).json({ error: 'Unknown mode' });
+  if (typeof input !== 'string' || !input.trim()) return res.status(400).json({ error: 'No transcript received' });
+  if (input.length > MAX_INPUT) return res.status(400).json({ error: `Transcript too long (max ${MAX_INPUT} characters)` });
+  const useModel = model || DEFAULT_EXTRACT_MODEL;
+  if (typeof useModel !== 'string' || !Object.hasOwn(EXTRACT_MODELS, useModel)) return res.status(400).json({ error: 'Unknown model' });
 
   try {
-    const started = Date.now();
-    if (mode === 'module1') return res.status(200).json(await module1(useModel, input, started));
-    const result = mode === 'judge'
-      ? await callOpenAI(useModel, prompts[mode], input)
-      : await callAnthropic(useModel, prompts[mode], input);
-    const ms = Date.now() - started;
-    if (result.error) return res.status(result.status).json({ error: result.error });
-
-    return res.status(200).json({
-      mode,
-      model: useModel,
-      // For "extract", also send the field list so the page can show one row per field.
-      fields: mode === 'extract' ? fields : undefined,
-      output: parseJson(result.text),
-      usage: result.usage,
-      ms,
-      cost_usd: costOf(useModel, result.usage)
-    });
+    const out = await module1(useModel, input, Date.now());
+    if (out.error) return res.status(502).json({ error: out.error });
+    return res.status(200).json(out);
   } catch (e) {
-    return res.status(500).json({ error: 'De modelaanbieder is niet bereikbaar', detail: String(e) });
+    console.error('module1 failed:', e?.message);
+    return res.status(502).json({ error: 'The model service is not reachable. Try again.' });
   }
 }
 
 // Claude (Anthropic Messages API), plain fetch.
 async function callAnthropic(model, system, input) {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return { status: 500, error: 'ANTHROPIC_API_KEY is niet ingesteld in Vercel' };
+  if (!key) return { status: 500, error: 'The server is not configured' };
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2026-10-21' },
@@ -68,34 +68,12 @@ async function callAnthropic(model, system, input) {
     })
   });
   const data = await r.json();
-  if (!r.ok) return { status: r.status, error: data.error?.message || 'Fout bij Anthropic' };
-  if (data.stop_reason === 'refusal') return { status: 502, error: 'Het model heeft dit verzoek geweigerd' };
+  if (!r.ok) { console.error('anthropic error', r.status, data.error?.type); return { status: r.status, error: 'The model service returned an error' }; }
+  if (data.stop_reason === 'refusal') return { status: 502, error: 'The model declined this request' };
   // The answer is in the text blocks (thinking blocks are skipped).
   const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
   const inTokens = data.usage?.input_tokens || 0, outTokens = data.usage?.output_tokens || 0;
   return { text, usage: { prompt_tokens: inTokens, completion_tokens: outTokens, total_tokens: inTokens + outTokens } };
-}
-
-// OpenAI (Chat Completions API), plain fetch. Used for the judge.
-async function callOpenAI(model, system, input) {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) return { status: 500, error: 'OPENAI_API_KEY is niet ingesteld in Vercel' };
-  const r = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model,
-      temperature: 0,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: `${system}\nAlways answer with valid JSON only.` },
-        { role: 'user', content: String(input) }
-      ]
-    })
-  });
-  const data = await r.json();
-  if (!r.ok) return { status: r.status, error: data.error?.message || 'Fout bij OpenAI' };
-  return { text: data.choices[0].message.content, usage: data.usage };
 }
 
 // Read JSON from the model's text, also when it is wrapped in ```json ... ```.
