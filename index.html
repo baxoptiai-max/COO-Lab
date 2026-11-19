@@ -149,29 +149,142 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 #tryBox .btns button:disabled{opacity:.45;cursor:not-allowed}
 #tryBox th,#tryBox td{text-align:left;vertical-align:top;padding:6px 8px;font-size:13.5px}
 #tryBox .pill{margin:0 4px 4px 0}
+.advisor{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;font:600 14px var(--body);cursor:pointer}
+.advisor input{accent-color:var(--accent-ink)}
+.tabs{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;z-index:20;background:var(--paper);padding:10px 4px;margin-top:-36px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.tabs button{flex:0 0 auto;font:600 13.5px var(--body);border:0;background:var(--btn);color:var(--ink);border-radius:999px;box-shadow:0 0 0 3px var(--halo);padding:8px 16px;margin:4px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--grad);color:var(--on-accent)}
+.panel{display:grid;gap:56px}
+.panel[hidden]{display:none}
+.why{position:relative;padding:8px 12px 8px 38px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:14px;font-size:14px;color:var(--ink)}
+.why::before{content:"\1F4A1";position:absolute;left:12px;top:8px}
+.why p{max-width:none}
+.why p+p{margin-top:4px}
+body.no-why .why{display:none}
 </style>
 </head>
-<body>
+<body class="no-why">
 <main>
 
 <header class="stack">
   <span class="eyebrow">Stage 0 · AI-Native Baseline</span>
   <h1>COO <span class="gt">Lab</span></h1>
-  <p class="lede">A working example of AI-native operations for a COO at a three-year-old bio-AI company: leadership decisions become a decision log and an action tracker, and the all-hands becomes an always-on page that leadership updates every week and everyone can ask questions. No decks or documents to send around.</p>
-  <p class="note">Built by Barbara van Asten for the AI Operations / Chief of Staff application at Bioptimus. I have no view of Bioptimus's internal tools, so COO Lab is a pattern, not a product to install: it runs on the stack a company already has. All example data on this page is fictional.</p>
+  <label class="advisor"><input type="checkbox" id="showWhy"> COO advisor <span class="note">(why this matters, the choice made, the trade-off)</span></label>
 </header>
 
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button type="button" role="tab" data-tab="overview" aria-controls="tab-overview" aria-selected="false">Overview</button>
+  <button type="button" role="tab" data-tab="stack" aria-controls="tab-stack" aria-selected="false">Your stack &amp; flows</button>
+  <button type="button" role="tab" data-tab="try" aria-controls="tab-try" aria-selected="false">Try it</button>
+  <button type="button" role="tab" data-tab="all-hands" aria-controls="tab-all-hands" aria-selected="false">All-hands page</button>
+  <button type="button" role="tab" data-tab="tests" aria-controls="tab-tests" aria-selected="false">Where it fails</button>
+  <button type="button" role="tab" data-tab="next" aria-controls="tab-next" aria-selected="false">Next steps</button>
+</nav>
+
+<div class="panel" role="tabpanel" id="tab-overview" data-panel="overview" hidden>
+<div class="why" data-advisor="overview">
+  <p><b>Why it matters:</b> A COO needs meeting rhythm, decision rules and a route choice before any tool is added.</p>
+  <p><b>The choice:</b> Run on the tools and AI provider the company already has, with a neutral schema.</p>
+  <p><b>The trade-off:</b> It is a pattern, not a product to install; the workspace and tools are assumed, not known.</p>
+</div>
+<div class="stack">
+  <p class="lede">A working example of AI-native operations for a COO at a three-year-old bio-AI company: leadership decisions become a decision log and an action tracker, and the all-hands becomes an always-on page that leadership updates every week and everyone can ask questions. No decks or documents to send around.</p>
+  <p class="note">Built by Barbara van Asten for the AI Operations / Chief of Staff application at Bioptimus. I have no view of Bioptimus's internal tools, so COO Lab is a pattern, not a product to install: it runs on the stack a company already has. All example data on this page is fictional.</p>
+</div>
+
+<section class="stack" aria-labelledby="h-base">
+  <h2 id="h-base">The baseline these modules enforce</h2>
+  <div class="grid2">
+    <div class="card stack">
+      <h3>Meeting cadence</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Forum</th><th>Job</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td>Weekly leadership</td><td>Decide, not report</td><td>Decision log</td></tr>
+          <tr><td>Weekly all-hands</td><td>Leadership walks through what changed on the live page</td><td>Updated all-hands page, no deck</td></tr>
+          <tr><td>Monthly Collaboration Week</td><td>Progress against OKRs, trade-offs</td><td>Updated targets</td></tr>
+          <tr><td>Quarterly</td><td>OKR reset, board and investor prep</td><td>Board pack</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Each leader posts a weekly status update on the all-hands page before the meeting. Meeting time is for decisions; nothing is distributed as a file.</p>
+    </div>
+    <div class="card stack">
+      <h3>Decision rules</h3>
+      <ol>
+        <li>Every decision has one owner and a due date.</li>
+        <li>Every decision names the goal or OKR it moves.</li>
+        <li>The trade-off is written down in one line.</li>
+        <li>Every decision carries a label: <b>All-hands</b>, <b>Leadership only</b> or <b>Board only</b>.</li>
+        <li>A changed decision gets a new entry; the old one stays visible.</li>
+      </ol>
+    </div>
+    <div class="card stack">
+      <h3>AI fluency curriculum (non-R&amp;D teams)</h3>
+      <ol>
+        <li><b>Build your own workflow:</b> each person automates one recurring task from their own week.</li>
+        <li><b>Sensitive data:</b> what may go into which tool, and why the labels above exist.</li>
+        <li><b>Check the output:</b> test cases, sources and when a human signs off.</li>
+      </ol>
+      <p class="note">Success measure: workflows still in use after 90 days, not attendance.</p>
+    </div>
+    <div class="card stack">
+      <h3>Route choice</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Part</th><th>Route</th></tr></thead>
+        <tbody>
+          <tr><td>Transcript</td><td>Consume: the meeting tool already in use</td></tr>
+          <tr><td>Module 1</td><td>Embed: own small app on the contracted AI provider, fixed schema, rule checks, approval step</td></tr>
+          <tr><td>Module 2</td><td>Extend with RAG: the all-hands page is a knowledge problem, solved by retrieval with role-based access and citations</td></tr>
+          <tr><td>Rejected</td><td>Fine-tuning (no labelled data, behaviour is solved by schema), Build (not relevant)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="panel" role="tabpanel" id="tab-stack" data-panel="stack" hidden>
+<div class="why" data-advisor="stack">
+  <p><b>Why it matters:</b> The COO sees where each step runs on tools the company already uses.</p>
+  <p><b>The choice:</b> Three flows with a person approving at the handoff: the COO signs off, each leader signs off.</p>
+  <p><b>The trade-off:</b> The tools are your own pick, so the diagrams show a pattern, not a fixed setup.</p>
+</div>
 <section class="stack" aria-labelledby="h-stack">
-  <h2 id="h-stack">1. Put in your own stack</h2>
+  <h2 id="h-stack">Put in your own stack</h2>
   <p>Choose the tools your company already uses. Both flows below redraw with your systems, so you can see where each step would run.</p>
   <div class="card picker" id="picker"></div>
 </section>
 
 <section class="stack" aria-labelledby="h-m1">
   <span class="eyebrow">Module 1 · Decision to action</span>
-  <h2 id="h-m1">2. From leadership meeting to <span class="gt">action</span></h2>
+  <h2 id="h-m1">From leadership meeting to <span class="gt">action</span></h2>
   <p>Every decision gets an owner, a date, a link to a company goal and a confidentiality label. Nothing is published before the COO approves it.</p>
   <div class="flow" id="flow1"></div>
+</section>
+
+<section class="stack" aria-labelledby="h-m2">
+  <span class="eyebrow">Module 2 · The all-hands page (Extend with RAG)</span>
+  <h2 id="h-m2">An always-on all-hands page you can <span class="gt">ask</span></h2>
+  <p>The all-hands is no longer a deck. It is one live page with vision, mission, targets, delivery status, the decision log and each leader's weekly status update. In the weekly all-hands, leadership walks through what changed on the page; between meetings, anyone can ask it a question and get an answer with its source.</p>
+  <p>What the page can search depends on who is asking. Access is filtered before the model reads anything, so a colleague's question never reaches leadership-only text.</p>
+  <div class="flow" id="flow2"></div>
+</section>
+
+<section class="stack" aria-labelledby="h-m3">
+  <span class="eyebrow">Module 3 · Weekly status update</span>
+  <h2 id="h-m3">How the weekly updates get onto the page</h2>
+  <p>Leaders don't start from a blank page. The leadership meeting transcript already holds most of their status, so COO Lab drafts each leader's update from it. The leader then adds or corrects by speaking instead of typing: a Stanford study found speech input about three times faster than typing on a phone keyboard (<a href="https://news.stanford.edu/stories/2016/08/stanford-study-speech-recognition-faster-texting">Stanford, 2016</a>).</p>
+  <div class="flow" id="flow3"></div>
+</section>
+</div>
+
+<div class="panel" role="tabpanel" id="tab-try" data-panel="try" hidden>
+<div class="why" data-advisor="try">
+  <p><b>Why it matters:</b> The COO sees what a meeting produces before anything reaches the company.</p>
+  <p><b>The choice:</b> The model extracts, code checks, and the all-hands text uses only agreed items labelled all_hands.</p>
+  <p><b>The trade-off:</b> The leak check can withhold a harmless paragraph; the COO reads it and releases it after review.</p>
+</div>
+<section class="stack">
   <div class="card stack">
     <h3>Example output: decision log (fictional company)</h3>
     <div class="tbl">
@@ -207,40 +320,17 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
     </div>
   </div>
 </section>
+</div>
 
-<section class="stack" aria-labelledby="h-m2">
-  <span class="eyebrow">Module 2 · The all-hands page (Extend with RAG)</span>
-  <h2 id="h-m2">3. An always-on all-hands page you can <span class="gt">ask</span></h2>
-  <p>The all-hands is no longer a deck. It is one live page with vision, mission, targets, delivery status, the decision log and each leader's weekly status update. In the weekly all-hands, leadership walks through what changed on the page; between meetings, anyone can ask it a question and get an answer with its source.</p>
-  <p>What the page can search depends on who is asking. Access is filtered before the model reads anything, so a colleague's question never reaches leadership-only text.</p>
-  <div class="flow" id="flow2"></div>
-  <div><div class="toggle" role="group" aria-label="Ask as">
-    <button type="button" id="r-lead" aria-pressed="true">Ask as Leadership</button>
-    <button type="button" id="r-col" aria-pressed="false">Ask as Colleague</button>
-  </div></div>
-  <div class="rag">
-    <div class="card">
-      <h3 style="margin-bottom:8px">What this role can search</h3>
-      <div id="sources"></div>
-    </div>
-    <div class="card qa">
-      <h3>Try a question</h3>
-      <div id="questions" class="qa"></div>
-      <div id="answer" class="answer" aria-live="polite"><span class="note">Pick a question to see what COO Lab would answer for this role.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="stack" aria-labelledby="h-m3">
-  <span class="eyebrow">Module 3 · Weekly status update</span>
-  <h2 id="h-m3">4. How the weekly updates get onto the page</h2>
-  <p>Leaders don't start from a blank page. The leadership meeting transcript already holds most of their status, so COO Lab drafts each leader's update from it. The leader then adds or corrects by speaking instead of typing: a Stanford study found speech input about three times faster than typing on a phone keyboard (<a href="https://news.stanford.edu/stories/2016/08/stanford-study-speech-recognition-faster-texting">Stanford, 2016</a>).</p>
-  <div class="flow" id="flow3"></div>
-</section>
-
+<div class="panel" role="tabpanel" id="tab-all-hands" data-panel="all-hands" hidden>
+<div class="why" data-advisor="all-hands">
+  <p><b>Why it matters:</b> One live page replaces the all-hands deck, and a colleague's question never reaches leadership-only text.</p>
+  <p><b>The choice:</b> Access is filtered by role before the model reads anything.</p>
+  <p><b>The trade-off:</b> This is a mockup: KPIs and updates are placeholders, and dictation is simulated.</p>
+</div>
 <section class="stack" aria-labelledby="h-mock">
   <span class="eyebrow">Mockup</span>
-  <h2 id="h-mock">5. The <span class="gt">always-on</span> all-hands page</h2>
+  <h2 id="h-mock">The <span class="gt">always-on</span> all-hands page</h2>
   <p class="note">Concept mockup. Company news comes from Bioptimus's public website and press releases (latest first). Internal KPIs and leadership updates are placeholders, shown as [...]. Try the draft card: dictate, tidy, approve. Microphone access is off in this preview, so the dictation is simulated.</p>
   <div class="mock">
     <div class="mock-bar"><span>All-hands</span><span class="mono">Week 47 · updated Thu 19 Nov</span></div>
@@ -293,58 +383,33 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   </div>
 </section>
 
-<section class="stack" aria-labelledby="h-base">
-  <h2 id="h-base">6. The baseline these modules enforce</h2>
-  <div class="grid2">
-    <div class="card stack">
-      <h3>Meeting cadence</h3>
-      <div class="tbl"><table>
-        <thead><tr><th>Forum</th><th>Job</th><th>Output</th></tr></thead>
-        <tbody>
-          <tr><td>Weekly leadership</td><td>Decide, not report</td><td>Decision log</td></tr>
-          <tr><td>Weekly all-hands</td><td>Leadership walks through what changed on the live page</td><td>Updated all-hands page, no deck</td></tr>
-          <tr><td>Monthly Collaboration Week</td><td>Progress against OKRs, trade-offs</td><td>Updated targets</td></tr>
-          <tr><td>Quarterly</td><td>OKR reset, board and investor prep</td><td>Board pack</td></tr>
-        </tbody>
-      </table></div>
-      <p class="note">Each leader posts a weekly status update on the all-hands page before the meeting. Meeting time is for decisions; nothing is distributed as a file.</p>
+<section class="stack">
+  <div><div class="toggle" role="group" aria-label="Ask as">
+    <button type="button" id="r-lead" aria-pressed="true">Ask as Leadership</button>
+    <button type="button" id="r-col" aria-pressed="false">Ask as Colleague</button>
+  </div></div>
+  <div class="rag">
+    <div class="card">
+      <h3 style="margin-bottom:8px">What this role can search</h3>
+      <div id="sources"></div>
     </div>
-    <div class="card stack">
-      <h3>Decision rules</h3>
-      <ol>
-        <li>Every decision has one owner and a due date.</li>
-        <li>Every decision names the goal or OKR it moves.</li>
-        <li>The trade-off is written down in one line.</li>
-        <li>Every decision carries a label: <b>All-hands</b>, <b>Leadership only</b> or <b>Board only</b>.</li>
-        <li>A changed decision gets a new entry; the old one stays visible.</li>
-      </ol>
-    </div>
-    <div class="card stack">
-      <h3>AI fluency curriculum (non-R&amp;D teams)</h3>
-      <ol>
-        <li><b>Build your own workflow:</b> each person automates one recurring task from their own week.</li>
-        <li><b>Sensitive data:</b> what may go into which tool, and why the labels above exist.</li>
-        <li><b>Check the output:</b> test cases, sources and when a human signs off.</li>
-      </ol>
-      <p class="note">Success measure: workflows still in use after 90 days, not attendance.</p>
-    </div>
-    <div class="card stack">
-      <h3>Route choice</h3>
-      <div class="tbl"><table>
-        <thead><tr><th>Part</th><th>Route</th></tr></thead>
-        <tbody>
-          <tr><td>Transcript</td><td>Consume: the meeting tool already in use</td></tr>
-          <tr><td>Module 1</td><td>Embed: own small app on the contracted AI provider, fixed schema, rule checks, approval step</td></tr>
-          <tr><td>Module 2</td><td>Extend with RAG: the all-hands page is a knowledge problem, solved by retrieval with role-based access and citations</td></tr>
-          <tr><td>Rejected</td><td>Fine-tuning (no labelled data, behaviour is solved by schema), Build (not relevant)</td></tr>
-        </tbody>
-      </table></div>
+    <div class="card qa">
+      <h3>Try a question</h3>
+      <div id="questions" class="qa"></div>
+      <div id="answer" class="answer" aria-live="polite"><span class="note">Pick a question to see what COO Lab would answer for this role.</span></div>
     </div>
   </div>
 </section>
+</div>
 
+<div class="panel" role="tabpanel" id="tab-tests" data-panel="tests" hidden>
+<div class="why" data-advisor="tests">
+  <p><b>Why it matters:</b> The COO should see where the system can be wrong before trusting it.</p>
+  <p><b>The choice:</b> Each risk has a test on fictional Helix Labs cases; a leak counts as a failure whatever else scores well.</p>
+  <p><b>The trade-off:</b> In Run 2b nothing leaked, but 7 of 8 runs had the all-hands text withheld.</p>
+</div>
 <section class="stack" aria-labelledby="h-tests">
-  <h2 id="h-tests">7. Where it can fail, and the test for each</h2>
+  <h2 id="h-tests">Where it can fail, and the test for each</h2>
   <div class="card tbl"><table>
     <thead><tr><th>Risk</th><th>Test case</th><th>Pass when</th></tr></thead>
     <tbody>
@@ -360,8 +425,34 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   </table></div>
 </section>
 
+<section class="stack" aria-labelledby="h-results">
+  <h2 id="h-results">Test results: Run 1, Run 2 and Run 2b</h2>
+  <p>Fictional Helix Labs cases, run against the live link. The columns are not like for like: some test expectations changed between Run 1 and Run 2, and Run 2b covers only two cases.</p>
+  <div class="card tbl"><table>
+    <thead><tr><th></th><th>Run 1 (baseline, no changes)</th><th>Run 2 (after the fix round)</th><th>Run 2b (after the leak fix)</th></tr></thead>
+    <tbody>
+      <tr><td>What was run</td><td>7 cases, 1 run per model</td><td>7 cases, 3 runs per model</td><td>cases 4 and 6 only (case 4: 3 runs per model, case 6: 1 run per model)</td></tr>
+      <tr><td>Haiku fields</td><td class="num">84%</td><td class="num">96%</td><td class="num">case 4: 100%</td></tr>
+      <tr><td>Sonnet fields</td><td class="num">88%</td><td class="num">92%</td><td class="num">case 4: 83% (worst run 50%)</td></tr>
+      <tr><td>Haiku flags</td><td class="num">60%</td><td class="num">100%</td><td class="num">case 4: 100%</td></tr>
+      <tr><td>Sonnet flags</td><td class="num">60%</td><td class="num">100%</td><td class="num">case 4: 75% (worst run 25%)</td></tr>
+      <tr><td>Leaks</td><td class="num">0</td><td class="num">1 of 21 runs per model (both in case 4)</td><td class="num">0 of 8 runs</td></tr>
+      <tr><td>All-hands text withheld</td><td class="num">0</td><td class="num">1 of 21 (Haiku), 0 of 21 (Sonnet)</td><td class="num">7 of 8 runs</td></tr>
+      <tr><td>Average response time</td><td class="num">Haiku 4.5 s, Sonnet 5.6 s</td><td class="num">Haiku 4.4 s, Sonnet 3.8 s</td><td class="num">about 3 to 6 s</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Full tables and the findings are in <a href="https://github.com/baxoptiai-max/COO-Lab/blob/main/tests/results-run2.md">tests/results-run2.md</a> and the README.</p>
+</section>
+</div>
+
+<div class="panel" role="tabpanel" id="tab-next" data-panel="next" hidden>
+<div class="why" data-advisor="next">
+  <p><b>Why it matters:</b> It shows what is not built, so nobody assumes it is.</p>
+  <p><b>The choice:</b> Phase 2 (KPI scorecard, research-to-delivery handoff) is indicated, not built.</p>
+  <p><b>The trade-off:</b> The page rests on listed assumptions, and the workspace and AI provider are unknown.</p>
+</div>
 <section class="stack" aria-labelledby="h-next">
-  <h2 id="h-next">8. Phase 2 (indicated, not built)</h2>
+  <h2 id="h-next">Phase 2 (indicated, not built)</h2>
   <div class="grid2">
     <div class="phase stack"><h3>KPI and measurement scorecard</h3><p>One scorecard across R&amp;D, Commercial and Operations. The decision log supplies the first operations metrics: time from decision to done, and the share of decisions with an owner and date.</p></div>
     <div class="phase stack"><h3>Research-to-delivery handoff</h3><p>Gates between exploratory research and the teams that ship to enterprise customers. Each gate is a decision type, so it follows the same decision rules and lands in the same log.</p></div>
@@ -387,6 +478,12 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
     </div>
   </div>
 </section>
+
+<section class="stack" aria-labelledby="h-links">
+  <h2 id="h-links">Read more</h2>
+  <p>The <a href="https://github.com/baxoptiai-max/COO-Lab/blob/main/README.md">README</a> explains how this was built, how it would run and where it fails. The code and the tests are in the <a href="https://github.com/baxoptiai-max/COO-Lab">GitHub repo</a>.</p>
+</section>
+</div>
 
 <footer>COO Lab · Barbara van Asten · OptiAI Strategy · 2026. Example data is fictional; no Bioptimus internal information was used.</footer>
 </main>
@@ -581,6 +678,27 @@ buildPicker(); render();
     } catch (e) { $('tryStatus').textContent = 'No answer from /api/run. This only works on the live link, not in a local preview.'; }
     $('tryRun').disabled = false;
   };
+})();
+</script>
+<script>
+// Tabs: one panel at a time, kept in the URL hash (#overview, #stack, #try, #all-hands, #tests, #next).
+// The stack picker keeps its choice in memory, so it carries over when you change tab.
+(function(){
+  const tabs = [...document.querySelectorAll('.tabs [data-tab]')], panels = [...document.querySelectorAll('.panel')];
+  const names = tabs.map(t => t.dataset.tab);
+  function show(name, scroll){
+    if (!names.includes(name)) name = 'overview';
+    tabs.forEach(t => { const on = t.dataset.tab === name; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; if (on) t.scrollIntoView({block:'nearest', inline:'nearest'}); });
+    panels.forEach(p => { p.hidden = p.dataset.panel !== name; });
+    if (scroll) { const nav = document.querySelector('.tabs'); if (window.scrollY > nav.offsetTop) window.scrollTo(0, nav.offsetTop); }
+  }
+  tabs.forEach(t => t.addEventListener('click', () => { history.replaceState(null, '', '#' + t.dataset.tab); show(t.dataset.tab, true); }));
+  addEventListener('hashchange', () => show(location.hash.slice(1), true));
+  show(location.hash.slice(1), false);
+  // COO advisor: a checkbox turns the advisor notes on or off (off by default).
+  const adv = document.getElementById('showWhy');
+  const update = () => document.body.classList.toggle('no-why', !adv.checked);
+  adv.addEventListener('change', update); update();
 })();
 </script>
 </body>
